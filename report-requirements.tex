@@ -1,102 +1,58 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Requirements Elicitation and Analysis}\label{requirements}
 
+Generally, the functional requirements of the project are to build the said
+simulation together with an application to visualize it and some commands to
+manage it.
+
 \begin{itemize}
-  \item The requirements must explain \textbf{what} (not how) the software
-  being produced should do.
-  %
-  \begin{itemize}
-    \item you should not focus on the particular problems, but exclusively on
-    what you want the application to do.
-  \end{itemize}
-
-  \item Requirements must be clearly identified, and possibly numbered
-
-  \item Requirements are divided into:
-  %
-  \begin{itemize}
-    \item \textbf{Functional}: some functionality the software should provide to the user
-
-    \item \textbf{Non-functional}: requirements that do not directly concern behavioural aspects, such as consistency, availability, etc.
-
-    \item \textbf{Implementation}: constrain the entire phase of system realization, 
-    for instance by requiring the use of a specific programming language and/or a specific software tool
-    %
-    \begin{itemize}
-      \item these constraints should be adequately justified by political / economic / administrative reasons\ldots{}
-      \item \ldots{} otherwise, implementation choices should emerge \emph{as  a consequence of} design
-    \end{itemize}
-  \end{itemize}
-
-  \item If there are domain-specific terms, these should be explained in a glossary
-  
-  \item Each requirement must have its own \textbf{acceptance criterion}
-  %
-  \begin{itemize}
-    \item these will be important for the validation phase
-  \end{itemize}
+  \item 1 - The system shall comprise a roundabout, surrounded by a certain
+  number of straight roads (e.g. 4).
+  \item 1.1 - The roundabout has a single lane and vehicles inside move
+  counter-clockwise.
+  \item 1.2 - A road is made of two lanes, for opposite directions; vehicles
+  ride on their respective right side.
+  \item 2 - The system shall comprise a certain amount of cars (in a reasonable
+  number, e.g. up to 30).
+  \item 2.1 - A car's surface covers a rectangle, both visually and
+  physically (e.g. for collisions).
+  \item 2.2 - A car is able to move in space, at a speed which can range
+  from a certain minimum to a certain maximum and be changed by changing its
+  acceleration. The physical model thus comprehends simple uniform motion
+  and uniformly accelerated motion, both linear (for a straight road) and
+  circular (around the roundabout).
+  \item 2.3 - Each car is assigned an entry road and an exit road: it
+  will come from the former towards the central roundabout, ride some distance
+  inside it and then exit from the latter. It can spawn on any point on the
+  entry road and despawn once it's ridden for some distance on the exit road.
+  The distance ridden inside the roundabout must be strictly greater than zero
+  and no more than a full lap, meaning that having the same entry and exit road
+  implicates doing exactly one lap.
+  \item 2.4 - Each car is able to proceed autonomously.
+  \item 3 - The system shall comprise one controller.
+  \item 3.1 - The controller can receive spatial data from vehicles.
+  \item 3.2 - The controller can send commands to vehicles, to alter their
+  acceleration.
+  \item 4 - The system shall show a simulation, where vehicles can move from
+  each one's start to end point and communicate with the controller.
+  \item 4.1 - In the simulation, vehicles can be in one of three states: normal
+  (correctly communicating with the controller and following its orders);
+  failsafe (correctly communicating with the controller, but not receiving, or
+  receiving but not following, its orders); disconnected (completely unable to
+  either send or receive data to or from the controller).
+  \item 4.2 - The simulation constantly checks for collisions between cars, in
+  order to report them.
+  \item 5 - The system shall offer ways to both visualize and give some commands
+  to the simulation.
+  \item 5.1 - The system allows to visualize the simulation, in real time,
+  through a web application.
+  \item 5.2 - The web application allows to pause or resume the simulation.
+  \item 5.3 - The web application allows to visualize additional data on the
+  vehicles, such as current speed and acceleration.
+  \item 5.4 - The system allows to send additional commands via http requests,
+  also accessible through a \textit{bash} wrapper terminal script.
+  \item 5.5 - Available commands include: pausing and resuming the simulation,
+  changing the state of one or more vehicles.
 \end{itemize}
 
-\subsection{Relevant Distributed System Features}
-\label{ds-features}
 
-Motivate which distributed system features are relevant for your project, and which are not.
-%
-\begin{itemize}
-  \item transparency
-  \begin{itemize}
-    \item does your system need to hide distribution details from users or developers?
-    \item is it important that failures, location, or replication are invisible?
-  \end{itemize}
-
-  \item fault tolerance, dependability -- availability, reliability, integrity, maintainability, safety
-  \begin{itemize}
-    \item what happens if a component fails? is uninterrupted service required?
-    \item is data loss or corruption unacceptable?
-    \item how quickly must the system recover from faults?
-  \end{itemize}
-
-  \item scalability
-  \begin{itemize}
-    \item will the system need to handle increasing numbers of users, requests, or data?
-    \item is it expected to grow over time?
-  \end{itemize}
-
-  \item security, trust
-  \begin{itemize}
-    \item is sensitive data being processed or stored?
-    \item are there multiple user roles with different permissions?
-    \item is authentication or authorization required?
-  \end{itemize}
-
-  \item resource sharing
-  \begin{itemize}
-    \item do multiple users or components need access to shared resources?
-    \item is coordination or synchronization needed?
-  \end{itemize}
-
-  \item openness, interoperability, heterogeneity of components
-  \begin{itemize}
-    \item Will your system interact with external systems or use components built with different technologies?
-    \item Is standardization or compatibility important?
-  \end{itemize}
-
-  \item evolvability, maintainability
-  \begin{itemize}
-    \item Will the system need to be updated or extended after deployment?
-    \item Is long-term maintenance a concern?
-  \end{itemize}
-
-  \item performance, concurrency, computation / communication efficiency, bandwidth
-  \begin{itemize}
-    \item Are there strict requirements on response time or throughput?
-    \item Will many operations happen in parallel?
-    \item Is network usage a concern?
-  \end{itemize}
-
-  \item economy, costs  
-  \begin{itemize}
-    \item Are there budget constraints for development, deployment, or operation?
-    \item Is minimizing resource usage important?
-  \end{itemize}
-\end{itemize}

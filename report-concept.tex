@@ -1,38 +1,34 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Concept}\label{concept}
 
-Here you should explain:
+The developed product is a simulation for an hypotehtical (and simplified)
+scenario where some coordination is required to guide a certain number of
+autonomous cars through an intersection with a roundabout: a Cyber-Physical
+System. Each vehicle is able to proceed on its own, but a central controller is
+present to communicate with them, in order to optimize the traffic. The
+simulation can be visualized through a web application and exposes, through a
+web service, some commands, for example accessible via terminal scripts or via
+the application itself.
 
-\begin{itemize}
-  \item The type of product developed with that project, for example (non-exhaustive):
-  %
-  \begin{itemize}
-    \item Application (with GUI, be it mobile, web, or desktop)
-    \item Command-line application (CLI could be used by humans or scripts)
-    \item Library
-    \item Web-service(s)
-  \end{itemize}
+The simulation has been thought to run endlessly without the need for human
+interaction; the commands may be used for debugging or for testing particular
+scenarios (pause/resume, change the state of some vehicles to disconnected from
+the network, fetch information on them). No user data is thus required to be
+stored.
 
-  \item Use case description:
-  %
-  \begin{itemize}
-    \item \emph{what} is the software doing?
-    \item \emph{where} are the users?
-    \item \emph{when} and \emph{how frequently} do they interact with the system?
-    \item \emph{how} do they \emph{interact} with the system? which \emph{devices} are they using?
-    \item does the system need to \emph{store} user's \textbf{data}? \emph{which}? \emph{where}?
-    \item most likely, there will be \emph{multiple} \textbf{roles}
-  \end{itemize}
+Even inside the simulated world, cars are completely autonomous and don't
+require any human interaction. The central controller only needs to collect from
+each one some spatial information (such as position an speed) and store it for a
+small amount of time (e.g. 1 second, after which data is considered stale and no
+longer useful).
 
-  \item Why is distribution needed?
-  %
-  \begin{itemize}
-    \item geographically distributed environments?
-    \item computation speedup?
-    \item resource sharing?
-    \item fault tolerance?
-    \item other reasons?
-  \end{itemize}
-  %
-  In any case, please elaborate.
-\end{itemize}
+This scenario could already be considered a distributed system due to its own
+nature, where the cars are nodes that, in order to navigate safely, need to at
+least gather information on each other's position. Adding a central controller,
+then, opens up for more possibilities to improve the efficiency of the system,
+while making sure that it's safe for its participants at all times: knowing each
+one's position and destination and being able to adjust the speed of each one,
+it can optimize their interleaving order and make them run under more
+sustainable conditions. For example, braking too hard, with time, wears some
+components such as the tyres; on the other hand, avoiding higher speeds when not
+need will also save some fuel, besides carrying fewer risks in general.
