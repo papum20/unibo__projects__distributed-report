@@ -2,7 +2,7 @@
 \section{Requirements Elicitation and Analysis}\label{requirements}
 
 Generally, the functional requirements of the project are to build the said
-simulation together with an application to visualize it and some commands to
+simulation, together with an application to visualize it and some commands to
 manage it.
 
 \begin{itemize}
@@ -29,6 +29,9 @@ manage it.
   and no more than a full lap, meaning that having the same entry and exit road
   implicates doing exactly one lap.
   \item 2.4 - Each car is able to proceed autonomously.
+  \item 2.5 - Each car is provided with a local vision, allowing it to perceive
+  others nearby (in reality, it could be implemented through infra-red, for
+  example).
   \item 3 - The system shall comprise one controller.
   \item 3.1 - The controller can receive spatial data from vehicles.
   \item 3.2 - The controller can send commands to vehicles, to alter their
@@ -55,4 +58,94 @@ manage it.
   changing the state of one or more vehicles.
 \end{itemize}
 
+Non-functional requirements are instead related to safety of vehicles on the
+road:
+
+\begin{itemize}
+  \item 6.1 - \textbf{Fault tolerance} of the entire system: the controller or the
+  network may even experience malfunctions, but the safety of vehicles should be
+  maintaned at all times, to prevent accidents.
+  \item 6.2 - \textbf{Opennes} and \textbf{interoperability}: the system should be open and
+  interoperable with different implementations, for example, from different car
+  brands.
+\end{itemize}
+
+\todo{tdd/unit tests/other tests; model first etc.}
+
+
+\subsection{Relevant Distributed System Features}
+
+\subsubsection{Transparency}\label{distr_transparency}
+Several forms of \textbf{transparency} can be found in this project, although
+most aren't strongly required, if not for the general advantages of having a
+higher level of abstraction for the user. The system should just be resilient
+enough accept a variable number of users, i.e. vehicles, replacing old ones with
+new ones as they go away; also, the location of nodes isn't important and, given
+the nature of the context itself, vehicles move all the times (\textbf{location
+transparency}) - although they of course have to share their position.
+There's no shared resource to access (\textbf{concurrency transparency}), but
+rather each car shares its position asynchronously and then the controller will
+periodically evaluate available data and issue commands back, one by one. So,
+\textbf{scalability transparency} is relevant for users, but it has not been
+handled for the central controller, nor have been other forms like
+\textbf{replication, migration, performance}, although the broker intermediary
+would help to hide these details. Finally, \textbf{failure transparency} isn't
+granted, since both the controller and a user will know if the other isn't
+responding, in which case the car will switch to \textit{failsafe mode}.
+
+\subsubsection{Dependability}
+\textbf{Fault tolerance} is the main focus of the project, since \textbf{safety}
+should be granted at all times. Even if the controller may not respond, the
+entire system provides \textbf{reliability}, mainly through two measures
+implemented on every single vehicle: there's no alternative to prevent all
+accidents.
+
+First, after a network timeout, a \textit{failsafe mode} is activated
+immediately, providing instructions in the place of the controller without
+disrupting the traffic flow. Thanks to it, users' nodes are totally autonomous
+and independent, so that the controller isn't necessary but only increases the
+efficiency of the system.
+
+Secondly, even while remote commands are being received correctly, they can be
+\textit{overridden} in any moment if there's an emergency: for example, the
+vehicle may start to get too close to the one to the front, or even a totally
+unexpected new vehicle may appear ahead, one which was disconnected from the
+network and the controller wasn't aware about - besides other possible ostacles
+in the real world, such as pedestrian and fallen objects. This measure could
+also prove useful if communication data got somehow altered, either by
+interferences or by malicious attackers.
+
+Both these autonomous operation modes rely on the car's \textit{local vision}.
+The \textbf{controller} also has an additional way to handle unresponding nodes:
+besides vehicles' data, it also receives what appears in the local vision of
+each one. Thanks to this sort of crowdsensing, it's able to reconstruct a map of
+all vehicles, so that it can make its calculations as optimal as possible, even
+if it won't be able to send commands to these so-called \textit{ghosts}. It
+should be noted, however, that the more vehicles are disconnected from the
+network, the less reliable this data will be, having more ``invisible'' nodes
+than those contributing to the crowdsensing. Moreover, data can only be provided
+by vehicles connected to the network (whether they're responding to commands or
+driving in failsafe mode), but not by those which are completely disconnected
+from the network.
+
+\subsubsection{Scalability}
+In addition to what said in \ref{distr_transparency}, \textbf{scaling} can
+easily be performed thanks to the publish-subscribe model: no additional
+configuration would be required for the communication with vehicles, although
+increasing the amount of controller nodes would require adding some complexity
+to the system. Moreover, the MQTT protocol is specifically designed to work with
+constrained devices, to grant netowrk reliability. On the other hand, in its
+current implementation, the system isn't expected to expand much: the roundabout
+surrounding can only contain a limited amount of cars, and the old ones are
+constantly replaced, in the controller's memory, as they drive away.
+
+\subsubsection{Dependability}
+
+\subsubsection{Dependability}
+
+\subsubsection{Dependability}
+
+\subsubsection{Dependability}
+
+\subsubsection{Dependability}
 
