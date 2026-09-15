@@ -1,220 +1,147 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Design}\label{design}
 
-This chapter explains the strategies used to meet the requirements identified in the analysis. 
-%
-Ideally, the design should be the same, regardless of the technological choices made during the implementation phase.
+\subsection{Architecture}\label{arch:architecture} The architecture is
+event-driven, revolving around a message oriented broker, through a
+publish-subscribe mechanism. Under normal conditions, there's a centralized
+controller to orchestrate traffic; however, each vehicle is also provided with
+an autonomous and fully functioning logic (\textit{failsafe mode}), in order to
+work even under network unavailability. Finally, a server, subscribed to the
+same message broker, employs a REST API to serve the simulation visualization to
+a client and to receive configuration commands.
 
-\begin{quote}
-You can re-arrange the sections as you prefer, but all the sections must be present in the end
-\end{quote}
+This architecture type addresses many of the distributed systems features
+discussed in the requirements.
+\\
+\\
+First of all, the message based broker already provides naturally many forms of
+\textbf{transparency} (\ref{req:distr_transparency}), since every node has to
+only communicate with this, without having to know many details about the
+others, not even their number (\textbf{scalability transparency}),
+or having to share additional information with them.
 
-\noindent
-\textbf{Important:} try to motivate your design choices in relation to the requirements and features identified 
-in \cref{requirements} and \cref{ds-features}.
-
-\subsection{Architecture}\label{architecture}
-
-\begin{itemize}
-  \item Which architectural style?
-  %
-  \begin{itemize}
-    \item why?
-  \end{itemize}
-\end{itemize}
+Moreover, a broker, using a standard protocol for messages, makes it
+straightforward, without any additional modification or configuration needed,
+to: change the number of nodes (\textbf{scalability},
+\ref{req:distr_scalability}); make modifications and improvements in a modular
+way, to a single infrastructure component (evolvability, \ref{req:distr_evolv});
+integrate different technologies, as long as they use the same communication
+protocols (openness, \ref{req:distr_openness}).
+\\
+\\
+Implementing an autonomous logic in each car was fundamental: it's the only way
+to guarantee the required (requirement 6.1, \ref{req:req_fault}) fault tolerance
+(\ref{req:distr_dependability}). In fact, even if the controller was perfectly
+implemented to be always available, there can always be network issues, and a
+car accident can't be accepted. Furthermore, one should also expect that some
+vehicles may be completely unreachable: even if the controller has a way to
+tackle this problem (refer to controller's behaviour, \ref{arch:behaviour}) by
+receiving the cars in the local vision of each one, there can never be a
+guarantee that it won't miss some, especially when there are only a few ones
+responding and sharing data. Finally, even in normal conditions, a local logic,
+without any network latency, constitutes an additional safety measure.
+\\
+\\
+The web server doesn't have any other notable characteristics, since it's expected
+to only be used by one, or few, people to visualize the simulation, thus without a
+heavy load; even in a real life scenario, a similar solution may be used by just
+a few system's maintainers for monitoring purposes.
 
 \subsection{Infrastructure}\label{infrastructure}
+The infrastructure follows simply from the architecture
+(\ref{arch:architecture}), with components:
 
 \begin{itemize}
-  \item are there \emph{infrastructural components} that need to be introduced? \emph{how many}?
-  %
-  \begin{itemize}
-    \item e.g.~\emph{clients}, \emph{servers}, \emph{load balancers},
-    \emph{caches}, \emph{databases}, \emph{message brokers},
-    \emph{queues}, \emph{workers}, \emph{proxies}, \emph{firewalls},
-    \emph{CDNs}, \emph{etc.}
-  \end{itemize}
-
-  \item how do components \emph{distribute} over the network? \emph{where}?
-  %
-  \begin{itemize}
-    \item e.g.~do servers / brokers / databases / etc. sit on the same
-    machine? on the same network? on the same datacenter? on the same
-    continent?
-  \end{itemize}
-
-  \item how do components \emph{find} each other?
-  %
-  \begin{itemize}
-    \item how to \emph{name} components?
-    \item e.g.~DNS, \emph{service discovery}, \emph{load balancing},
-    \emph{etc.}
-  \end{itemize}
+  \item A car (replicated in multiple instances), comprising fictional sensors
+  (sensing data), actuators (applying instructions) and their own logic.
+  \item One controller.
+  \item One messaage broker.
+  \item One simulation service: subscribed to the same broker, it handles some
+  tasks about the simulation itself, most of all detecting collisions between
+  vehicles.
+  \item One web-viewer.
 \end{itemize}
 
-\begin{quote}
-Component diagrams are welcome here
-\end{quote}
+The system uses Docker containerization to simulate a geographically distributed
+environment. Each vehicle and each other component runs as an isolated process
+in its own container, sharing only the broker's virtual network. So, every
+communication happens through the broker, except the REST calls from the
+simulation's viewer to the web server.
+
+\todo{Component diagram}
 
 \subsection{Modelling}\label{modelling}
+\textbf{Domain entities} are mostly constituted by the vehicles: the entity
+defined as \textbf{vehicle position} only only contains spatial data
+(position and speed); the \textbf{vehicle} entity contains the same spatial data
+plus some additional information, such as acceleration and variables for
+displaying. Note that a \textbf{vehicle position} reflects our model of what a
+car's local vision can perceive: infra-red sensors would be able to quickly read
+another object's speed and position.
 
+In addition, there are entities for \textbf{controller commands} (issued to
+vehicles) and \textbf{system commands} (configuration controls issued by the
+viewer).
+
+Each vehicle maintains:
 \begin{itemize}
-  \item which \textbf{domain entities} are there?
-  %
-  \begin{itemize}
-    \item e.g.~\emph{users}, \emph{products}, \emph{orders}, \emph{etc.}
-  \end{itemize}
-  
-  \item how do \emph{domain entities} \textbf{map to} \emph{infrastructural components}?
-  %
-  \begin{itemize}
-    \item e.g.~state of a video game on central server, while inputs/representations on clients
-    \item e.g.~where to store messages in an IM app? for how long?
-  \end{itemize}
-
-  \item which \textbf{domain events} are there?
-  %
-  \begin{itemize}
-    \item e.g.~\emph{user registered}, \emph{product added to cart}, \emph{order placed}, \emph{etc.}
-  \end{itemize}
-  
-  \item which sorts of \textbf{messages} are exchanged?
-  %
-  \begin{itemize}
-    \item e.g.~\emph{commands}, \emph{events}, \emph{queries}, \emph{etc.}
-  \end{itemize}
-
-  \item what information does the \textbf{state} of the system comprehend
-  %
-  \begin{itemize}
-    \item e.g.~\emph{users' data}, \emph{products' data}, \emph{orders' data}, \emph{etc.}
-  \end{itemize}
+  \item its \textbf{local state}, as a \textbf{vehicle};
+  \item a \textbf{vehicle position} for each car in its vision's range: a subset
+  of the global state.
 \end{itemize}
 
-\begin{quote}
-Class diagram are welcome here
-\end{quote}
+The controller maintains:
+\begin{itemize}
+  \item \textbf{active_vehicles}: a dictionary of healthy \textbf{vehicles},
+  transmitted directly by themselves;
+  \item \textbf{precedence_queue}: a queue to manage the order of arrival at the
+  roundabout's entrance;
+  \item \textbf{ghosts}: estimated \textbf{vehicle positions} of disconnected
+  vehicles (reconstructed through the healthy ones' crowdsensing).
+\end{itemize}
+
+All data on the controller's node is kept up-to-date, i.e. old entries (older
+than a certain threshold) are periodically purged, hence its never too different
+from the real-time data, known by each vehicle alone.
+
+All commands are exchanged over the network and used immediately, never stored.
+
+\todo{events, also depending on arch drawing}
+
+Exchanged messages reflect the entities, and how they're perceived by each
+component:
+\begin{itemize}
+  \item a periodical message for each healthy \textbf{vehicle}'s telemetry;
+  \item a periodical message for each \textbf{vehicle} (even the disconnected
+  ones): the controller doesn't utilize this, since this data wouldn't be
+  available in real life, but the simulation does, in order to display the real
+  state to the viewer;
+  \item a periodical message for the objects in the local vision of each healthy
+  vehicle;
+  \item periodical messages for controller commands;
+  \item messages for system commands, from the user to the web viewer (which
+  will then communicate them to the correct recipient);
+  \item messages for system commands, from the web viewer (after receiving one
+  from the viewer), either towards individual vehicles or towards all at the
+  same time in broadcast;
+  \item messages for detected collisions, from the simulation component, to be
+  displayed to the viewer;
+\end{itemize}
+
+\todo{diagram}
 
 \subsection{Interaction}\label{interaction}
 
-\begin{itemize}
-  \item how do components \emph{communicate}? \emph{when}? \emph{what}?
-  \item \emph{which} \textbf{interaction patterns} do they enact?
-\end{itemize}
 
-\begin{quote}
-Sequence diagrams are welcome here
-\end{quote}
+\subsection{Behaviour}\label{arch:behaviour}
 
-\subsection{Behaviour}\label{behaviour}
-
-\begin{itemize}
-  \item how does \emph{each} component \textbf{behave} individually (e.g.~in \emph{response} to \emph{events} or messages)?
-  \begin{itemize}
-    \item some components may be \emph{stateful}, others \emph{stateless}
-  \end{itemize}
-
-  \item which components are in charge of updating the \textbf{state} of the system? \emph{when}? \emph{how}?
-\end{itemize}
-
-\begin{quote}
-State diagrams are welcome here
-\end{quote}
 
 \subsection{Data and Consistency Issues}\label{data-and-consistency-issues}
 
-\begin{itemize}
-  \item Is there any data that needs to be stored?
-  %
-  \begin{itemize}
-    \item \emph{what} data? \emph{where}? \emph{why}?
-  \end{itemize}
-  
-  \item how should \emph{persistent data} be \textbf{stored}?
-  %
-  \begin{itemize}
-    \item e.g.~relations, documents, key-value, graph, etc.
-    \item why?
-  \end{itemize}
-  
-  \item Which components perform queries on the database?
-  %
-  \begin{itemize}
-    \item \emph{when}? \emph{which} queries? \emph{why}?
-    \item concurrent read? concurrent write? why?
-  \end{itemize}
-  
-  \item Is there any data that needs to be shared between components?
-  %
-  \begin{itemize}
-    \item \emph{why}? \emph{what} data?
-  \end{itemize}
-\end{itemize}
-
 \subsection{Fault-Tolerance}\label{fault-tolerance}
 
-\begin{itemize}
-  \item Is there any form of data \textbf{replication} / federation / sharing?
-  %
-  \begin{itemize}
-    \item \emph{why}? \emph{how} does it work?
-  \end{itemize}
-  
-  \item Is there any \textbf{heart-beating}, \textbf{timeout}, \textbf{retry mechanism}?
-  %
-  \begin{itemize}
-    \item \emph{why}? \emph{among} which components? \emph{how} does it work?
-  \end{itemize}
-  
-  \item Is there any form of \textbf{error handling}?
-  %
-  \begin{itemize}
-    \item \emph{what} happens when a component fails? \emph{why}? \emph{how}?
-  \end{itemize}
-\end{itemize}
 
 \subsection{Availability}\label{availability}
 
-\begin{itemize}
-  \item Is there any \textbf{caching} mechanism?
-  %
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-  
-  \item Is there any form of \textbf{load balancing}?
-  %
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-
-  \item In case of \textbf{network partitioning}, how does the system behave?
-  %
-  \begin{itemize}
-    \item \emph{why}? \emph{how}?
-  \end{itemize}
-\end{itemize}
 
 \subsection{Security}\label{security}
-
-\begin{itemize}
-  \item Is there any form of \textbf{authentication}?
-  %
-  \begin{itemize}
-    \item \emph{where}? \emph{why}?
-  \end{itemize}
-
-  \item Is there any form of \textbf{authorization}?
-  %
-  \begin{itemize}
-    \item which sort of \emph{access control}?
-    \item which sorts of users / \emph{roles}? which \emph{access rights}?
-  \end{itemize}
-
-  \item Are \textbf{cryptographic schemas} being used?
-  %
-  \begin{itemize}
-    \item e.g.~token verification,
-    \item e.g.~data encryption, etc.
-  \end{itemize}
-\end{itemize}
