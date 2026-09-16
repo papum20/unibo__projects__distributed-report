@@ -1,0 +1,30 @@
+@startuml
+[*] --> NORMAL : Spawn
+
+NORMAL --> FAILSAFE : Network Timeout (Missed Heartbeats)
+NORMAL --> FAILSAFE : SysCommand(ENTER_FAILSAFE)
+NORMAL --> DISCONNECTED : SysCommand(ENTER_DISCONNECTED)
+
+FAILSAFE --> NORMAL : Connection Restored (Receive Command)
+FAILSAFE --> NORMAL : SysCommand(EXIT_FAILSAFE)
+FAILSAFE --> DISCONNECTED : SysCommand(ENTER_DISCONNECTED)
+
+DISCONNECTED --> NORMAL : SysCommand(EXIT_DISCONNECTED)
+
+note right of NORMAL
+  - Receives controller commands
+  - Publishes telemetry
+end note
+
+note right of FAILSAFE
+  - Local failsafe logic
+  - Ignores controller commands
+  - Publishes telemetry
+end note
+
+note right of DISCONNECTED
+  - Local failsafe logic
+  - No network interaction
+  - Others may see it as a ghost
+end note
+@enduml

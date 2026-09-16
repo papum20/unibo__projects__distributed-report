@@ -1,0 +1,24 @@
+@startuml
+skinparam componentStyle uml2
+
+node "Docker Host Network" {
+    component "MQTT Broker\n(Eclipse Mosquitto)" as Broker <<Message Bus>>
+    
+    component "Central Controller" as Controller <<Server>>
+    
+    component "Simulation Service" as Sim <<Observer>>
+    
+    component "Web Viewer Backend\n(REST API)" as WebViewer <<Server>>
+    
+    collections "Vehicles (x N)" as Vehicles <<Clients / Edge Nodes>>
+}
+
+actor "Human Spectator" as User
+
+Vehicles <--> Broker : MQTT (Telemetry, Vision, Commands)
+Controller <--> Broker : MQTT (Read Telemetry, Send Commands)
+Sim --> Broker : MQTT (Publish Collisions)
+WebViewer <--> Broker : MQTT (Read State, Send SysCommands)
+
+User <--> WebViewer : HTTP / WebSockets
+@enduml

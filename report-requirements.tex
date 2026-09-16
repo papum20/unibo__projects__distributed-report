@@ -1,60 +1,62 @@
 % ! TeX root = distributed-systems-final-report.tex
-\section{Requirements Elicitation and Analysis}\label{requirements}
+\section{Requirements Elicitation and Analysis}\label{req:requirements}
 
 Generally, the functional requirements of the project are to build the said
 simulation, together with an application to visualize it and some commands to
 manage it.
 
 \begin{itemize}
-  \item 1 - The system shall comprise a roundabout, surrounded by a certain
+  \item 1 --- The system shall comprise a roundabout, surrounded by a certain
   number of straight roads (e.g. 4).
-  \item 1.1 - The roundabout has a single lane and vehicles inside move
+  \item 1.1 --- The roundabout has a single lane and vehicles inside move
   counter-clockwise.
-  \item 1.2 - A road is made of two lanes, for opposite directions; vehicles
+  \item 1.2 --- A road is made of two lanes, for opposite directions; vehicles
   ride on their respective right side.
-  \item 2 - The system shall comprise a certain amount of cars (in a reasonable
+  \item 2 --- The system shall comprise a certain amount of cars (in a reasonable
   number, e.g. up to 30).
-  \item 2.1 - A car's surface covers a rectangle, both visually and
-  physically (e.g. for collisions).
-  \item 2.2 - A car is able to move in space, at a speed which can range
+  \item 2.1 --- A car's surface covers a rectangle, both visually (viewed
+  top-down) and physically (e.g. for collisions).
+  \item 2.2 --- A car is able to move in space, at a speed which can range
   from a certain minimum to a certain maximum and be changed by changing its
   acceleration. The physical model thus comprehends simple uniform motion
   and uniformly accelerated motion, both linear (for a straight road) and
-  circular (around the roundabout).
-  \item 2.3 - Each car is assigned an entry road and an exit road: it
+  circular (around the roundabout). Acceleration also ranges from a negative
+  minimum (for braking) to a positive maximum; the minimum amount (i.e.
+  strongest braking) should be used as little as possible, to reduce car's wear.
+  \item 2.3 --- Each car is assigned an entry road and an exit road: it
   will come from the former towards the central roundabout, ride some distance
   inside it and then exit from the latter. It can spawn on any point on the
   entry road and despawn once it's ridden for some distance on the exit road.
   The distance ridden inside the roundabout must be strictly greater than zero
   and no more than a full lap, meaning that having the same entry and exit road
   implicates doing exactly one lap.
-  \item 2.4 - Each car is able to proceed autonomously.
-  \item 2.5 - Each car is provided with a local vision, allowing it to perceive
+  \item 2.4 --- Each car is able to proceed autonomously.
+  \item 2.5 --- Each car is provided with a local vision, allowing it to perceive
   others nearby (in reality, it could be implemented through infra-red, for
   example).t
-  \item 3 - The system shall comprise one controller.
-  \item 3.1 - The controller can receive spatial data from vehicles.
-  \item 3.2 - The controller can send commands to vehicles, to alter heir
+  \item 3 --- The system shall comprise one controller.
+  \item 3.1 --- The controller can receive spatial data from vehicles.
+  \item 3.2 --- The controller can send commands to vehicles, to alter heir
   acceleration.
-  \item 4 - The system shall show a simulation, where vehicles can move from
+  \item 4 --- The system shall show a simulation, where vehicles can move from
   each one's start to end point and communicate with the controller.
-  \item 4.1 - In the simulation, vehicles can be in one of three states: normal
+  \item 4.1 --- In the simulation, vehicles can be in one of three states: normal
   (correctly communicating with the controller and following its orders);
   failsafe (correctly communicating with the controller, but not receiving, or
   receiving but not following, its orders); disconnected (completely unable to
   either send or receive data to or from the controller).
-  \item 4.2 - The simulation constantly checks for collisions between cars, in
+  \item 4.2 --- The simulation constantly checks for collisions between cars, in
   order to report them.
-  \item 5 - The system shall offer ways to both visualize and give some commands
+  \item 5 --- The system shall offer ways to both visualize and give some commands
   to the simulation.
-  \item 5.1 - The system allows to visualize the simulation, in real time,
+  \item 5.1 --- The system allows to visualize the simulation, in real time,
   through a web application.
-  \item 5.2 - The web application allows to pause or resume the simulation.
-  \item 5.3 - The web application allows to visualize additional data on the
+  \item 5.2 --- The web application allows to pause or resume the simulation.
+  \item 5.3 --- The web application allows to visualize additional data on the
   vehicles, such as current speed and acceleration.
-  \item 5.4 - The system allows to send additional commands via http requests,
+  \item 5.4 --- The system allows to send additional commands via http requests,
   also accessible through a \textit{bash} wrapper terminal script.
-  \item 5.5 - Available commands include: pausing and resuming the simulation,
+  \item 5.5 --- Available commands include: pausing and resuming the simulation,
   changing the state of one or more vehicles.
 \end{itemize}
 
@@ -89,63 +91,10 @@ there's no shared resource to access, and \textbf{failure transparency} isn't
 granted, since failures are actually taken in great consideration in the project
 requirements themselves.
 
-
-Several forms of \textbf{transparency} can be found in this project, although
-most aren't strongly required, if not for the general advantages of having a
-higher level of abstraction for the user. The system should just be resilient
-enough to accept a variable number of users, i.e. vehicles, replacing old ones with
-new ones as they go away; also, the location of nodes isn't important and, given
-the nature of the context itself, vehicles move all the times (\textbf{location
-transparency}) - although they of course have to share their position.
-
-\textbf{concurrency transparency} isn't relevant, since there's no shared
-resource to access (see \ref{req:distr_sharing}). So, \textbf{scalability
-transparency} is relevant for users, but it has not been handled for the central
-controller, nor have been other forms like \textbf{replication, migration,
-performance}, although the broker intermediary would help to hide these details.
-Finally, \textbf{failure transparency} isn't granted, since both the controller
-and a user will know if the other isn't responding, in which case the car will
-switch to \textit{failsafe mode}.
-
 \subsubsection{Dependability}\label{req:distr_dependability}
 \textbf{Fault tolerance} is the main focus of the project, since \textbf{safety}
 should be granted at all times. Even with network issues, the system should
 provide \textbf{reliability} globally.
-
-
-\textbf{Fault tolerance} is the main focus of the project, since \textbf{safety}
-should be granted at all times. Even if the controller may not respond, the
-entire system provides \textbf{reliability}, mainly through two measures
-implemented on every single vehicle: there's no alternative to prevent all
-accidents.
-
-First, after a network timeout, a \textit{failsafe mode} is activated
-immediately, providing instructions in the place of the controller without
-disrupting the traffic flow. Thanks to it, users' nodes are totally autonomous
-and independent, so that the controller isn't necessary but only increases the
-efficiency of the system.
-
-Secondly, even while remote commands are being received correctly, they can be
-\textit{overridden} in any moment if there's an emergency: for example, the
-vehicle may start to get too close to the one to the front, or even a totally
-unexpected new vehicle may appear ahead, one which was disconnected from the
-network and the controller wasn't aware about - besides other possible ostacles
-in the real world, such as pedestrian and fallen objects. This measure could
-also prove useful if communication data got somehow altered, either by
-interferences or by malicious attackers.
-
-Both these autonomous operation modes rely on the car's \textit{local vision}.
-The \textbf{controller} also has an additional way to handle unresponding nodes:
-besides vehicles' data, it also receives what appears in the local vision of
-each one. Thanks to this sort of crowdsensing, it's able to reconstruct a map of
-all vehicles, so that it can make its calculations as optimal as possible, even
-if it won't be able to send commands to these so-called \textit{ghosts}. It
-should be noted, however, that the more vehicles are disconnected from the
-network, the less reliable this data will be, having more ``invisible'' nodes
-than those contributing to the crowdsensing. Moreover, data can only be provided
-by vehicles connected to the network (whether they're responding to commands or
-driving in failsafe mode), but not by those which are completely disconnected
-from the network.
 
 \subsubsection{Scalability}\label{req:distr_scalability}
 As already mentioned, the number of vehicles will vary over time; however, it
@@ -154,18 +103,7 @@ amount of cars, hence the actual number of involved nodes at the same time isn't
 expected to grow a lot. For a different, larger scenario trying to coordinate
 traffic across a wider area, this may become a more urgent issue.
 
-
-In addition to what said in \ref{req:distr_transparency}, \textbf{scaling} can
-easily be performed thanks to the publish-subscribe model: no additional
-configuration would be required for the communication with vehicles, although
-increasing the amount of controller nodes would require adding some complexity
-to the system. Moreover, the MQTT protocol is specifically designed to work with
-constrained devices, to grant netowrk reliability. On the other hand, in its
-current implementation, the system isn't expected to expand much: the roundabout
-surrounding can only contain a limited amount of cars, and the old ones are
-constantly replaced, in the controller's memory, as they drive away.
-
-\subsubsection{Security}
+\subsubsection{Security}\label{req:distr_security}
 \textbf{Security} would be very important in this scenario, in
 the real world, since giving false information would mislead the controller's
 calculations on one side and result in dangerous instructions for the vehicles
@@ -177,41 +115,13 @@ On one hand, in fact, wrong commands could lead to accidents; on the other hand,
 an overflooding of inexisting cars' positions could lead the controller to block
 the entire system.
 
-
-\textbf{Security} wasn't taken into consideration in the development of this
-project (for lack of time), but it would be very important in this scenario, in
-the real world, since giving false information would mislead the controller's
-calculations on one side and result in dangerous instructions for the vehicles
-on the other: thus, it would be particularly important to guarantee data
-\textbf{integrity} and use \textbf{authentication} to prevent the injection of
-false data.
-TLS authentication, already supported by Mosquitto MQTT, could easily be added
-in the future.
-
-According to the current design, the system has already been thought
-to prevent accidents due to wrong commands, thanks to the cars' \textit{local
-vision} and the \textit{failsafe mode} that can take control in case of
-emergency; however, an overflooding of inexisting cars' positions could lead the
-controller to block the entire system.
-
 \subsubsection{Resource sharing}\label{req:distr_sharing}
 No resource has been planned to be shared.
-
-
-There's no shared resource to access, but rather each car shares its position
-asynchronously and then the controller will periodically evaluate available data
-and issue commands back, one by one, through MQTT messages.
 
 \subsubsection{Openness, interoperability, heterogeneity of components}\label{req:distr_openness}
 As stated in constraint 6.2 (\ref{req:req_openness}), the system should be open to
 potentially welcome external vehicles' implementations, for example even with
 different languages and technologies.
-
-
-Using standardized communication protocols (JSON messages over MQTT), the system
-is open to potentially welcome external vehicles' implementations, for example
-even with different languages and technologies: any vehicle with similar
-characteristics may join the network and adhere to the controller's supervision.
 
 \subsubsection{Evolvability, maintainability}\ref{req:distr_evolv}
 The system probably doesn't require updates, unless there are changes to the
@@ -228,29 +138,6 @@ Regarding computational performance and network load, since the system isn't
 expected to grow significantly (as mentioned in \ref{req:distr_scalability}),
 there shouldn't be a need for particularly expensive servers and network
 interfaces to sustain enough vehicles.
-
-
-Since vehicles are constantly moving, possibly even at high speeds, the command
-evaluation frequency is important, although, as well as the timeout to consider
-data too old (and fallback to \textit{failsafe mode}).
-
-An higher number of cycles per seconds (currently 10 for both cars and
-controller) would improve estimations, in exchange for computational cost (cars,
-having a simpler logic, could easily run at higher frequency, but they were only
-limited in the simulation for efficiency purposes). The performance impact would
-even worsen with more users, although a not
-too expensive server should be able to run the controller efficiently.
-
-A higher network timeout (currently 0.5 seconds), instead, would result in more
-wrong estimations from the controller and, thus, more activations of
-\textit{failsafe mode} to prevent crashes. Moreover, the timeout is also used by
-the controller to calculate a car's reaction time, that is for how long (and for
-what distance) it will continue riding at a certain speed until it starts
-braking (if necessary) - for humans, there isn't a network delay to account for,
-but rather a cognitive reaction time, usually considered of 1 second.
-
-In \ref{req:distr_scalability}, we already discussed the expected growth of the
-system's dimensions, for which the network shouldn't feel burdened. 
 
 \subsubsection{Economy, costs}
 There shouldn't be any particular constraints to limit economical costs: once

@@ -2,5 +2,26 @@
 \section{Implementation}\label{implementation}
 
 
+\todo{notes:}
+
+In addition to what said in \ref{req:distr_transparency}, \textbf{scaling} can
+easily be performed thanks to the publish-subscribe model: no additional
+configuration would be required for the communication with vehicles, although
+increasing the amount of controller nodes would require adding some complexity
+to the system. Moreover, the MQTT protocol is specifically designed to work with
+constrained devices, to grant netowrk reliability. On the other hand, in its
+current implementation, the system isn't expected to expand much: the roundabout
+surrounding can only contain a limited amount of cars, and the old ones are
+constantly replaced, in the controller's memory, as they drive away.
+
+Using standardized communication protocols (JSON messages over MQTT), the system
+is open to potentially welcome external vehicles' implementations, for example
+even with different languages and technologies: any vehicle with similar
+characteristics may join the network and adhere to the controller's supervision.
+
+TLS authentication, already supported by Mosquitto MQTT, could easily be added
+in the future.
+
+
 \subsection{Technological details}\label{technological-details}
 

@@ -1,0 +1,34 @@
+@startuml
+participant "Vehicle N" as VN
+participant "MQTT Broker" as Broker
+participant "Controller" as Ctrl
+participant "Simulation" as Sim
+
+== Subscription Phase (Startup) ==
+Ctrl -> Broker: subscribe("vehicle/+/telemetry")
+Ctrl -> Broker: subscribe("vehicle/+/vision")
+VN -> Broker: subscribe("vehicle/N/command")
+Sim -> Broker: subscribe("vehicle/+/position")
+
+== Notification Phase (Loop) ==
+loop Every 0.1s (10Hz)
+    VN -> Broker: publish("vehicle/N/telemetry", state)
+    Broker -> Ctrl: notify(telemetry)
+    
+    VN -> Broker: publish("vehicle/N/vision", local_ghosts)
+    Broker -> Ctrl: notify(vision)
+    
+    note over Ctrl: Evaluate safety & optimize
+    
+    Ctrl -> Broker: publish("vehicle/N/command", target_accel)
+    Broker -> VN: notify(command)
+end
+
+== Independent Collision Check ==
+loop
+    Broker -> Sim: notify(positions)
+    alt Collision Detected
+        Sim -> Broker: publish("vehicle/collisions", crash_data)
+    end
+end
+@enduml

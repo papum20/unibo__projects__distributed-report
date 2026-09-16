@@ -1,0 +1,78 @@
+@startuml
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+class Position {
+    + x : float
+    + y : float
+}
+
+enum VehicleNavState {
+    APPROACHING
+    IN_ROUNDABOUT
+    EXITING
+}
+
+enum VehicleState {
+    NORMAL
+    FAILSAFE
+    DISCONNECTED
+}
+
+class VehicleParams {
+    + max_speed : float
+    + max_accel : float
+    + max_brake : float
+}
+
+abstract class AbstractVehicle {
+    + id : string
+    + pos_angle : float
+    + speed : float
+    + nav_state : VehicleNavState
+}
+
+class VehiclePosition {
+    + timestamp : float
+}
+
+class Vehicle {
+    + acceleration : float
+    + state : VehicleState
+    + entry_road : int
+    + exit_road : int
+    + angle_traveled : float
+}
+
+class Command {
+    + target_acceleration : float
+}
+
+enum SystemCommandValue {
+    PAUSE
+    RESUME
+    ENTER_FAILSAFE
+    EXIT_FAILSAFE
+    ENTER_DISCONNECTED
+    EXIT_DISCONNECTED
+}
+
+class SystemCommand {
+    + command : SystemCommandValue
+    + vehicle_id : string
+    + vehicle_count : int
+}
+
+class VehicleCollision {
+    + v1_id : string
+    + v2_id : string
+    + timestamp : float
+}
+
+AbstractVehicle *-- "1" Position
+Vehicle *-- "1" VehicleParams
+AbstractVehicle <|-- Vehicle
+AbstractVehicle <|-- VehiclePosition
+SystemCommand *-- "1" SystemCommandValue
+
+@enduml
