@@ -1,6 +1,21 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Future works}\label{future-works}
 
-Discuss possible future works, improvements, extensions, optimizations, etc.
+As follows from the self-evaluation section (\ref{self-evaluation}), one of the
+most urgent steps would be to fix the logic implementation problems and make the
+simulation more correct (aiming at 0 collisions). Preventing the ``roundabout
+deadlocks'' (\ref{arch:behaviour_controller}), especially with many disconnected
+vehicles, would also be of high importance.
 
-Also discuss here any unimplemented feature, and how you would have implemented it.
+Then, as highlighted throughout the report, security hasn't been considered at
+all: one could start from the suggestions in the design section
+(\ref{arch:security}).
+
+Once these fundamentals have been taken into account and solidly validated, the
+development could proceed to add features, improve the controller's logic to
+make it even more efficient and expand the simulation. Additional features may
+include more road or roundabout lanes, obstacles on the road, different vehicles
+or cars with different speed and acceleration parameters. For the controller,
+better algorithms could be implemented. Finally, the simulation could be
+expanded to a larger scale, for example integrating it into the context of more
+roads in a city, which could lead to new distributed systems problems.

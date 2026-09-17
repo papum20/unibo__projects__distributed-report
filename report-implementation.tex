@@ -1,27 +1,50 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Implementation}\label{implementation}
 
+The project is built on Docker Compose, where vehicles are deployed as replicas
+and all services communicate on a virtual network.
 
-\todo{notes:}
+As \textbf{network protocols}, MQTT was used for messages and HTTP for REST API
+requests (for the web server).
 
-In addition to what said in \ref{req:distr_transparency}, \textbf{scaling} can
-easily be performed thanks to the publish-subscribe model: no additional
-configuration would be required for the communication with vehicles, although
-increasing the amount of controller nodes would require adding some complexity
-to the system. Moreover, the MQTT protocol is specifically designed to work with
-constrained devices, to grant netowrk reliability. On the other hand, in its
-current implementation, the system isn't expected to expand much: the roundabout
-surrounding can only contain a limited amount of cars, and the old ones are
-constantly replaced, in the controller's memory, as they drive away.
+MQTT fits perfectly the publish-subscribe architecture and is an industry
+standard for IoT and Cyber-Physical Systems. Moreover, the protocol is
+specifically designed to work with constrained devices, to grant netowrk
+reliability. Level 0 Quality of Service has been chosen to grant the lowest
+latency (performance requirement, \ref{req:distr_performance}), thanks to its
+lower communication overhead; dropping packets isn't a problem, since having the
+newest data is always the priority for vehicles and controller, while stale data
+isn't used. Level 1 has only been used for system commands, which are issued
+sporadically but whose reception is more important.
 
-Using standardized communication protocols (JSON messages over MQTT), the system
-is open to potentially welcome external vehicles' implementations, for example
-even with different languages and technologies: any vehicle with similar
-characteristics may join the network and adhere to the controller's supervision.
-
-TLS authentication, already supported by Mosquitto MQTT, could easily be added
-in the future.
+All in-transit data is serialized as JSON, which is easily readable for
+debugging and widely available acroos diffrent languages.
+\\
+\\
+Regarding the \textbf{model-first} constraint (\ref{req:model-first}), it has
+been respected quite well: the models (in $src/common/models/$) have been
+defined before writing the code, with a python library enforcing data validation
+(pydantic). Many of the classes have been defined at the beginning of the
+development. Some classes have been added later when a new kind of message,
+interaction or message was needed, as well as fields of existing classes were
+modified or new ones created.
 
 
 \subsection{Technological details}\label{technological-details}
 
+Eclipse Mosquitto has been used as the MQTT broker, being a lightweight
+implementation with native Docker support. Furthermore, it also supports TLS
+authentication, for future development additions.
+
+All services are written in Python (3.12): vehicle, controller, web server,
+simulation service. The \textit{asyncio} library has been exploited to handle
+concurrent tasks, for instance for simultaneous, listening, publishing and logic
+loops. The \textit{aiomqtt} (2.5.1) library has been used used for MQTT
+communication. Finally, \textit{pydantic} (2.13.4) has been employed to define
+domain models, enabling a model-first approach. \textit{pydantic} also
+automatically handles serialization and deserialization of JSON and enforces
+data validation.
+
+Regarding the web service, the \textit{FastAPI} (0.141.1) library has been used
+for the backend, whereas the front-end is written as a simple HTML5 page,
+including CSS and a JavaScript Canvas.

@@ -129,13 +129,16 @@ component:
   acceleration the car should use;
   \item periodical controller messages to share its state (for debugging),
   containing its managed entities;
-  \item messages for system commands, from the user to the web viewer (which
-  will then communicate them to the correct recipient);
-  \item messages for system commands, from the web viewer (after receiving one
-  from the viewer), either towards individual vehicles or towards all at the
-  same time in broadcast;
+  \item messages for system commands (over REST API), from the user to the web
+  viewer (which will then communicate them to the correct recipient);
+  \item messages for system commands (\textit{sysctrl} MQTT messages), from the
+  web viewer (after receiving one from the viewer), either towards individual
+  vehicles or towards all at the same time in broadcast;
   \item messages for detected collisions, from the simulation component, to be
   displayed to the viewer;
+  \item a message sent by a vehicle to communicate that it has reset it's
+  position (about reset in \ref{arch:behaviour_simulation}), for displaying
+  purposes;
 \end{itemize}
 
 Related to the messages, the main events can be identified as:
@@ -155,7 +158,7 @@ Related to the messages, the main events can be identified as:
 \begin{figure}
     \centering
     \includegraphics[width=\textwidth]{figures/class-diagram.pdf}
-    \caption{Domain entities, as classes. Vehicles are used to represet the system's state, whereas other entities are transmitted as messages payloads.}
+    \caption{Domain entities, as classes. Vehicles are used to represent the system's state, whereas other entities are transmitted as messages payloads.}
     \label{fig:class-diagram}
 \end{figure}
 
@@ -358,6 +361,37 @@ and don't have many possible conflict, but should only care about who's in
 front.
 \\
 \\
+One final controller's feature is aimed at preventing a deadlock inside the
+roundabout, in a case where all vehicles have halted but no one can resume
+because they're all too close to the one to their respective front: according
+the described logic, in fact, such a vehicle wouldn't accelerate until it has
+enough margin. Hence, if all inside vehicles have been stationary for a
+certain amount of time (e.g. 2 seconds), the controller will trigger a command 
+to accelerate to all; if there are some that have more margin
+than others, it will try to only send the command to them. In the worst case,
+all vehicles should proceed extremely slowly until someone exits, continuously
+alternating an acceleration and an emergency brake soon after. In an ideal
+world, all vehicles in a line could start accelerating at the same time and same
+pace, without colliding, but they would still have to go extremely slow, in
+order to be ready for any emergency brake with that small margin in front.
+
+In such a deadlock state, the controller won't allow any other vehicles to enter
+until a certain number of those inside has exited.
+
+Another possible option, for the controller, would be to count inside vehicles
+and urgently stop others from entering when there are too many.
+
+Anyway, there are already other measures trying to prevent such situations,
+seeing that inside vehicles try not to go slower than a certain speed and
+generally have higher priority.
+
+Another possible reason of blockage is when an inside vehicle $v_2$ has stopped
+to yield to an entering vehicle $v_1$, but they're both too close to the
+entrance and $v_1$ has stopped too: in this case, an ad hoc instruction will
+tell $v_1$ to accelerate (this is in the vehicle's \textit{failsafe mode} as
+well).
+\\
+\\
 Knowing the controller's functioning mechanism, it's now possible to see that
 its complexity is approximately quadratic in the number of total vehicles.
 Deeper studies on a real scenario would be required to understand if the
@@ -406,15 +440,18 @@ decisions, partly assumes the others will follow the traffic rules: whether
 they're follow the controller's commands or their owns, each logic still aims to
 only do safe moves.
 
-\subsubsection{Simulation}
+\subsubsection{Simulation}\label{arch:behaviour_simulation}
 The simulation service only takes care of identifying and publishing any
-collisions, calculated by looking for pairs of overlapping cars.
+collisions, calculated by looking for pairs of overlapping cars; to avoid an
+overflooding of messages, there's a cooldown (e.g. 1 second) to identify again
+collisions between the same pair of vehicles.
 
 The state of the simulation system is actually kept be the vehicles, each
 knowing (and publishing) its position.
 
 The number of vehicles remains always the same; when one gets far enough from
-the roundabout, it respawns with new random start and destination.
+the roundabout, it resets itself, respawning with new random start and
+destination.
 
 \subsubsection{Web-viewer}
 The web-viewer service makes it possible for a spectator user to visualize and
@@ -434,7 +471,7 @@ disconnected mode.
     \label{fig:vehicle-state-diagram}
 \end{figure}
 
-\subsection{Data and Consistency Issues}\label{data-and-consistency-issues}
+\subsection{Data and Consistency Issues}\label{arch:data}
 No data needs to be stored, since everything is used almost immediately and old
 data is soon considered stale and unusable; on the contrary, for the current
 tasks, a database would only introduce latency, which would be a problem.
@@ -449,12 +486,13 @@ The system uses \textbf{eventual consistency}; after all, every component's view
 is always behind the physical reality, only known by the cars themselves, and a
 network disconnection will increase the delay. Nonetheless, vehicles
 continuously publish their data, so that a listener will sooner or later fetch
-the latest state.
+the latest state. Therefore, data freshness is prioritized over consistency and
+purging old data is better than synchronizing it.
 
 Additionally, the controller tries to improve the consistency of its state with
 the real one through the prediction mechanism (\ref{arch:behaviour_controller}).
 
-\subsection{Fault-Tolerance}\label{fault-tolerance}
+\subsection{Fault-Tolerance}\label{arch:fault}
 Accepting the possibility of errors is one of the main concerns of the project;
 after all, this is a simulation of vehicles, meaning that they are constantly
 moving and can't afford to stop and wait for the signal to come back or the
@@ -480,6 +518,19 @@ return to a normal state as soon as it will be able to share its position and
 receive a command from the controller.
 \\
 \\
+Finally, some measures have been described with the controller
+(\ref{arch:behaviour_controller}) to prevent \textbf{deadlocks} and
+\textbf{starvation}, although they don't cover all possible cases; the case in
+which most or all vehicles are disconnected from the controller is especially
+lacking. Regarding starvation, after all, even in the real world it could be a
+problem in busy situations where a too insecure driver blocks one entry for
+minutes, letting everyone coming from other directions pass. Regarding
+deadlocks, the fact that vehicles in failsafe mode tend to not yield (unless
+necessary for emergency) when inside the roundabout should reassure (but not
+guarantee), analogously to what discussed about deadlocks in the controller's
+section (\ref{arch:behaviour_controller}).
+\\
+\\
 Availability and fault tolerance improvements, however, haven't been considered
 for the \textbf{controller}. One possibility would be to deploy more controller
 nodes to use as \textit{master-slave replication}: one is elected as the working
@@ -487,10 +538,28 @@ one, while the others only follow to keep their state up to date; in case of
 failure, a replica will become the new master. This approach would avoid to add
 latency, since the replicas don't need to communicate in normal conditions.
 
-\subsection{Availability}\label{availability}
+\subsection{Availability}\label{arch:availability}
+Since data freshness is much more important than consistency (analogously to
+\ref{arch:data}), \textbf{caching} would only be counterproductive for vehicles.
+Caching could only be useful for the web viewer backend, to reduce the load on
+the broker at the cost of displaying updates less often to the spectators.
 
+As discussed in \ref{req:distr_scalability}, the system isn't expected to scale
+much in the current conditions. If the simulation was to be expanded to
+a wider context, like a network of roundabouts or a city, a \textbf{load
+balancer} could be employed to reduce the load of many vehicles on a single
+controllers, by distributing requests among a cluster of controllers; however,
+this would introduce the additional challenge of performing global evaluations
+on separate nodes.
 
-\subsection{Security}\label{security}
+Since more roundabouts are mostly independent (although they could probably even
+be coordinated with each other), \textbf{network partitioning} could be a better
+option. If the city was divided into multiple zones by geographical
+partitioning, a controller could be dedicated to each one and thus have a
+reduced load; with a message topic dedicated to each zone, a vehicle would then
+only have to subscribe to right one.
+
+\subsection{Security}\label{arch:security}
 Security hasn't been considered deeply in the development, for lack of time,
 despite the observations in \ref{req:distr_security}.
 
