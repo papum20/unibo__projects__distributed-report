@@ -2,14 +2,15 @@
 \section{Deployment}\label{deployment}
 
 The system is deployed using docker compose, so a working \textit{Docker Engine}
-installation and $docker compose v2$ are required. Internet access is
-required to pull two used images from the web: $python:3.12-slim$ and
-$eclipse-mosquitto:2.1.2-alpine$.
+installation and \textit{docker compose v2} are required. Internet access is
+required to pull the two used images from the web: \textit{python:3.12-slim} and
+\textit{eclipse-mosquitto:2.1.2-alpine}.
 
 To clone the repository from github:
-\[
-  git clone https://github.com/papum20/unibo\_\_projects\_\_distributed-smart-roundabout.git
-\]
+\begin{verbatim}
+git clone \
+  https://github.com/papum20/unibo__projects__distributed-smart-roundabout.git
+\end{verbatim}
 
 The project is already setup and ready to be immediately deployed; changing
 configuration variables is optional. One should just be careful to have the
@@ -18,45 +19,45 @@ service).
 
 From linux, it can be \textbf{run} using the available bash scripts, which
 should be launched from the project's root directory. To run it:
-\[
-  ./src/start.sh
-\]
+\begin{verbatim}
+./src/start.sh
+\end{verbatim}
 
 Details on the running phase can be found in \ref{user-guide}.
 
 To stop docker compose (if necessary, first stop watching the containers logs
-by pressing $Ctrl+C$):
-\[
-  ./src/down.sh
-\]
+by pressing \textit{Ctrl+C}):
+\begin{verbatim}
+./src/down.sh
+\end{verbatim}
 
 Remember that any variable change requires to restart the proper containers; to
-be safe, restart all with $down.sh$ and then $start.sh$.
+be safe, restart all with \textit{down.sh} followed by \textit{start.sh}.
 
-The only \textit{docker compose} file $src/docker-compose.yml$ reads
-\textbf{environment variables} from $src/bash-scripts/clean.env.generated$, but
-they can be configured from $src/.env$ in a more readable way (with spacing):
-the $src/start.sh$ script is a wrapper that cleans $.env$ to produce
-$clean.env.generated$, before deploying with docker compose. Variables are
-explained through comments in the file and can be better understood by reading
-this report, but, in general, they involve the following topics:
+The only \textit{docker compose} file \textit{src/docker-compose.yml} reads
+\textbf{environment variables} from
+\textit{src/bash-scripts/clean.env.generated}, but they can be configured from
+\textit{src/.env} in a more readable way (with spacing): the
+\textit{src/start.sh} script is a wrapper that cleans \textit{.env} to produce
+\textit{clean.env.generated}, before deploying with docker compose. Variables
+are explained through comments in the file and can be better understood by
+reading this report, but, in general, they involve the following topics:
 \begin{itemize}
   \item ports (for container communication inside the virtual network) and local
   ports (exposed on the machine);
-  \item messages topics names;
+  \item message topics names;
   \item number of vehicle replicas (number of replicated docker containers).
 \end{itemize}
 
 Other variables, related to the implementation itself, can be configured in
-$common/const.py$: they will be shared among all python containers. The most
-interesting ones to try out are:
+\textit{common/const.py}: they will be shared among all python containers. The
+most interesting ones to try out are:
 \begin{itemize}
   \item dimensions for roundabout, roads and visualization area;
-  \item number of roads ($ROUNDABOUT\_N\_ROADS$);
-  \item additional vehicle safety margin $VEHICLE\_SAFETY\_MARGIN\_M$ (refer to
+  \item number of roads (\textit{ROUNDABOUT\_N\_ROADS});
+  \item additional vehicle safety margin \textit{VEHICLE\_SAFETY\_MARGIN\_M} (refer to
   \ref{arch:behaviour_controller});
-  \item car's local vision radius $CAR\_VISION\_RADIUS\_M$;
-  \item
+  \item car's local vision radius \textit{CAR\_VISION\_RADIUS\_M};
 \end{itemize}
 
 Other variables concern:
@@ -70,9 +71,13 @@ Other variables concern:
   \ref{arch:behaviour_controller});
 \end{itemize}
 
-\textit{About directories and docker compose structure}: in $src/$, there's a
-separate folder for each service. Except mosquittoMQTT, which directly uses the
-standard docker image (with a minimal configuration file), all other services
-copy their own folder into their respective container and run python. The
-$common/$ folder contains common variables and utilities and is copied into all
-python containers.
+All variables try to mimic real measures: in meters for distances, seconds for
+time intervals.
+\\
+\\
+\textit{About directories and docker compose structure}: in \textit{src/},
+there's a separate folder for each service. Except mosquittoMQTT, which instead
+directly uses the standard docker image (with a minimal configuration file), all
+other services' images copy their own folder into their respective container and
+run python. The \textit{common/} folder contains common variables and utilities
+and is copied into all python containers.

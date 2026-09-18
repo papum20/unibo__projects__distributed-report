@@ -12,8 +12,7 @@
 \newcommand{\emailaddr}[1]{\href{mailto:#1}{\texttt{#1}}}
 
 \title{\LARGE
-    Final Report Template\\
-    (replace with your project name)
+    Smart roundabout controller
 }
 \subtitle{Final Report for the Distributed Systems Course [2025-2026]}
 
@@ -32,11 +31,26 @@
 \maketitle
 
 \begin{abstract}
-    Up to $\sim$2000 characters briefly describing the project.
+    The project consists in a simulation of a Cyber-Physical System, where some
+    autonomous cars have to coordinate with each other to cross a roundabout,
+    each from its starting point to its destination. Moreover, a central
+    controller is available to give them more efficient commands, trying to
+    maximize the intersection's throughput while always maintaining safety as
+    the first priority. In fact, the main distributed systems challenge concerns
+    the reliability and fault tolerance of the system as a whole: network and
+    performance stability are also important, but failures, assumed to be
+    inevitable, should never result into car accidents. Several measures have
+    been implemented or just theorized in order to prevent deadlocks and
+    starvation, to guarantee liveness, to coordinate together healthy vehicles
+    with unreachable ones and to improve controller's predictions and
+    evaluations in general.
+
+    An application has also been produced to visualize the simulation in real
+    time and control it through some commands.
 \end{abstract}
 
 
-\input{report-disclaimer}
+%\input{report-disclaimer}
 
 \input{report-concept}
 

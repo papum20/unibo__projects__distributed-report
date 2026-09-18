@@ -1,7 +1,7 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Self-evaluation}\label{self-evaluation}
 
-This project has proven itself an engaging testing ground to test some of the
+This project has proven itself an engaging testing ground to analyze some of the
 challenges of distributed systems in a simulated real-world, tangible scenario.
 Many architectural choices have been taken (section \ref{design}) and techniques
 have been studied and applied (behaviour section, \ref{arch:behaviour}) trying
@@ -18,19 +18,19 @@ to disconnected, this still won't cause accidents.
 \\
 \\
 However, the implementation has revealed itself trickier than expected. There
-are still bugs or imprecisions in managing the physics and the collisions,
-therefore there are more collisions than we'd have hoped for, especially with
-many vehicles in failsafe mode, indicating that the failsafe logic may require
-more improvements.
+are still bugs or imprecisions in managing the physics and the collisions.
+Therefore there are more collisions than we'd have hoped for, especially with
+many vehicles in failsafe mode, indicating that the failsafe logic may most of
+all require more improvements.
 
 Some example results (from the testing section, \ref{validation-acceptance}),
-coming from averaging multiple 10 minutes simulation runs, with 4 roads, are:
-about 1 collision per minute with 40 vehicles in normal mode, 2 per minute with
-20 vehicles, 0.3 with 10 vehicles; about 1 collision every 10 seconds with 40
-vehicles, of which 10 to 30 are in failsafe or disconnected mode. Moreover, one
-run with 40 vehicles out of 40 in a disconnected state ended up in a deadlock
-inside the roundabout (same scenario described in
-\ref{arch:behaviour_controller}).
+coming from averaging multiple 10 minutes simulation runs and roughly rounding
+their results to get an idea, using 4 roads, are: about 1 collision per minute
+with 40 vehicles in normal mode, 2 per minute with 20 vehicles, 0.3 with 10
+vehicles; about 1 collision every 10 seconds with 40 vehicles, of which 10 to 30
+are in failsafe or disconnected mode. Moreover, one run with 40 vehicles out of
+40 in a disconnected state ended up in a deadlock inside the roundabout (same
+scenario described in \ref{arch:behaviour_controller}).
 
 The traffic flow as well doesn't seem to change much with or without the
 controller's help, since the total number of spawned vehicles is always around
@@ -50,9 +50,9 @@ of managing the project has been chosen for its higher educational value and
 stimulating appeal. Regarding the controller's logic, then, surely a more
 efficient evaluation process would have made the traffic more efficient, but
 algorithms are yet another subject, not worth spending time on, in the context
-of a distributed systems project: the implemented controller's checks where only
-the ones sufficient to make the traffic flow and, then, to address the
-distributed systems problems.
+of a small distributed systems project: the implemented controller's checks
+were the sole ones sufficient to make the traffic flow and, then, to address
+the distributed systems problems.
 \\
 \\
 Another weak point has of course been testing, widely discussed in

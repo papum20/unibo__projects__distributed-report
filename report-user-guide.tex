@@ -1,15 +1,22 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{User Guide}\label{user-guide}
 
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth]{figures/roundabout-app-screenshot.png}
+    \caption{Screenshot of the running web page.}
+    \label{fig:class-diagram}
+\end{figure}
+
 After the docker compose infrastructure has been deployed successfully, the
 simulation can be visualized, from a browser, on the \textbf{page}
-$http://localhost:8080$. Cars should be seen moving, proceeding proceed
+\textit{http://localhost:8080}. Cars should be seen moving, proceeding
 endlessly.
 \\
 \\
 A \textbf{dashboard} on the left of the page displays:
 \begin{itemize}
-  \item in the first row, in order, the total number of spawned vehicle in the
+  \item in the first row, in order, the total number of spawned vehicles in the
   simulation, the current number of vehicles, the current number of ghosts
   identified by the controller;
   \item on the left, a list with each vehicle's telemetry, sorted alphabetically
@@ -17,13 +24,13 @@ A \textbf{dashboard} on the left of the page displays:
   characters; a shortened word for its status (normal, failsafe or
   disconnected); speed ``S'' and acceleration ``A''; a shortened word for its
   navigation status (``APP'' for approaching, ``RND'' for in-roundabout, ``EXI''
-  for exiting); start and destination road indexes (start number $->$ end
+  for exiting); start and destination road indexes (start number \textit{->} end
   number); position in the priority queue, if present in it;
   \item below the telemetry, the controller's precedence queue, showing the
   vehicles with highest priority on the top;
   \item on the right, the identified collisions. Each one shows: a timestamp
-  ($hours:minutes:seconds$), conflicting vehicles ($v_1-v_2$), conflicting
-  vehicles' navigation statuses.
+  (\textit{hours:minutes:seconds}), conflicting vehicles ($v_1-v_2$),
+  conflicting vehicles' navigation statuses.
 \end{itemize}
 
 The actual \textbf{simulation} is shown in the area at the center of the page.
@@ -42,27 +49,28 @@ Pressing the \textit{spacebar} will pause or resume the simulation.
 \\
 The web server also exposes some http endpoints for interacting.
 
-The bash script $src/ctrl.sh$ can be used directly. It expects one command,
-optionally followed by the vehicles to address:
+The bash script \textit{src/ctrl.sh} can be used directly. It expects one
+command, optionally followed by the vehicles to address:
 \begin{itemize}
   \item without specified vehicles, the command is addressed to everyone (e.g.
 useful for pausing or resuming);
-  \item if it's a number $N$ of one or two digits, $N$ random vehicles will be
-addressed;
-  \item otherwise, a string (different from the previously described $N$) will
-  be used as prefix of a vehicle id and the single vehicle will be addressed, if
-  found and unique.
+  \item if it's a number \textit{N} of one or two digits, \textit{N} random
+vehicles will be addressed;
+  \item otherwise, a string (different from the previously described \textit{N})
+  will be used as prefix of a vehicle id and the single vehicle will be
+  addressed, if found and unique.
 \end{itemize}
 
-Available can be written as as entire words or by the short letter, uppercase or
+Commands can be written as entire words or by their short letter, uppercase or
 lowercase:
 \begin{itemize}
-  \item $pause$ ($p$)
-  \item $resume$ ($r$)
-  \item $failsafe$ ($f$): forcefully set to failsafe
-  \item $controller$ ($c$): undo failsafe (set to normal)
-  \item $disconnect$ ($d$): forcefully set to disconnected
-  \item $reconnect$ ($n$): undo disconnect (set to normal, like for $c$)
+  \item \textit{pause} (\textit{p})
+  \item \textit{resume} (\textit{r})
+  \item \textit{failsafe} (\textit{f}): forcefully set to failsafe
+  \item \textit{controller} (\textit{c}): undo failsafe (set to normal)
+  \item \textit{disconnect} (\textit{d}): forcefully set to disconnected
+  \item \textit{reconnect} (\textit{n}): undo disconnect (set to normal, like
+  for \textit{c})
 \end{itemize}
 
 Examples:
@@ -73,8 +81,8 @@ Examples:
 
 # pause/resume simulation
 ./src/ctrl.sh p
-./src/pause.sh r
-./src/ctrl.sh resume vehicle_id
+./src/ctrl.sh r
+./src/ctrl.sh resume
 # enter failsafe
 ./src/ctrl.sh f
 # exit failsafe, for vehicle with ID starting with 4fd2
@@ -105,8 +113,8 @@ The corresponding http API endpoints are:
     \item \textbf{POST /api/control}: submits a \texttt{SystemCommand} to alter
     the simulation state or inject network faults. Accepts a JSON payload
     requiring a \texttt{command} string (\textit{PAUSE, RESUME, ENTER\_FAILSAFE,
-    EXIT\_FAILSAFE, ENTER\_DISCONNECTED, EXIT\_DISCONNECTED}). Optionally accepts
-    \texttt{vehicle\_id} to target a specific node, or \texttt{vehicle\_count}
-    to apply the fault to a random subset of nodes, otherwise will target all if
-    left empty.
+    EXIT\_FAILSAFE,} \textit{ENTER\_DISCONNECTED, EXIT\_DISCONNECTED}).
+    Optionally accepts \texttt{vehicle\_id} to target a specific node, or
+    \texttt{vehicle\_count} to apply the fault to a random subset of nodes,
+    otherwise will target all if left empty.
 \end{itemize}

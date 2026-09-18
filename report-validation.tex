@@ -11,15 +11,16 @@ wasn't really maintained.
 Only in the very first stage, during the development of the first version of the
 simulated world, without any controller or vehicle logic but only with physical
 movements and mathematical operations, every time that a functionality was
-needed, a test was developed and only then that would have been implemented with
-a separate function (so that it could be tested alone). Unfortunately, this
-didn't last long, as the required features, and the related functions, soon
-became too complex. In the first place, this means that a functions becomes too
-hard to test, with too many possible normal or edge cases, and unexpected ones.
-The main problem, however, is that it was hard to even know in advance how the
-controller's or vehicle's logic should have come out at the end, so developing a
-test for a function that would have been changed or even removed soon after
-would have taken too much time away from the distributed systems related topics.
+needed, a test was developed first and only then that would have been
+implemented with a separate function (so that it could be tested alone).
+Unfortunately, this didn't last long, as the required features, and the related
+functions, soon became too complex. In the first place, this means that a
+function becomes too hard to test, with too many possible normal or edge cases,
+and unexpected ones. The main problem, however, is that it was hard to even know
+in advance how the controller's or vehicle's logic should have come out at the
+end, so developing a test for a function that would have been changed or even
+removed soon after would have taken too much time away from the distributed
+systems related topics.
 
 That said, just a few unit tests were developed right at the end, to test only a
 few isolated functionalities.
@@ -30,37 +31,37 @@ even taken in consideration at all, given the lack of time, the total absence of
 personal experience with specific tools and the probably complex general
 architecture.
 
-For communication and interaction testing, manual tests seemed enough
+For communication and interaction testing, manual tests was deemed enough
 (\ref{validation-acceptance}).
 \\
 \\
 \textit{pytest} (9.1.1) has been used for unit testing. All tests (in the
-$src/tests/$ folder) can be run, from the project's root directory, with:
-\[
+$src/tests/$ folder) can be run, from the project's root directory, with the
+command:
+\begin{verbatim}
   pytest
-\]
+\end{verbatim}
 
-One should first install the packages required by the tested services (all
+One should first install the packages required by the tested services (i.e. all
 except the web viewer), besides pytest itself. $src/tests/requirements.txt$
 contains them, and can be used with:
-\[
+\begin{verbatim}
   pip install -r src/tests/requirements.txt
-\]
-\\
-\\
-The developed unit tests for physics ($test_physics.py$) and mathematics
-($test_math_utils.py$ and $test_roundabout.py$) regard kinematics and
-calculations: the test, with some cases, that distances are calculated
+\end{verbatim}
+
+The developed unit tests for physics ($test\_physics.py$) and mathematics
+($test\_math\_utils.py$ and $test\_roundabout.py$) regard kinematics and
+calculations: they test, for a few cases, that distances are calculated
 correctly, for example on a line or on a circle, and that speeds and
 accelerations (positive or negative) are updated and used correctly, i.e.
 vehicles ride for the expected distance or the expected amount of time.
 
-Unit tests for the the controller ($test_controller.py$) test the command
+Unit tests for the the controller ($test\_controller.py$) test the command
 evaluation in a few cases by creating mock scenarios, verifying that a
 tail-gating vehicle decelerates to increase the margin from the one on the
 front, or that a vehicle with a lot of margin on the front keeps accelerating.
 
-Finally, unit tests for the vehicle ($test_vehicle.py$) perform analogous tests
+Finally, unit tests for the vehicle ($test\_vehicle.py$) perform analogous tests
 to those of the controller, but using its failsafe mode logic, and also check
 the collision detection.
 
@@ -69,12 +70,12 @@ the collision detection.
 Given the lack of automatic testing, manual testing has clearly been fundamental
 in the project, to continuously debug it and eventually validate it.
 
-Being the subject a simulated real scenario, verifying that everything goes as
-expected by looking at the visualization is straight-forward, although debugging
-requires much more effort, buy deeply analyzing the code and correlating it with
-what happens in the simulation, or by checking logs and vehicles and controller
-statistics. The behaviour one should expect to see is what described in the
-requirements (\ref{req:requirements}).
+Being the subject a simulated real-world scenario, verifying that everything
+goes as expected by looking at the visualization is straight-forward, although
+debugging requires much more effort, by deeply analyzing the code and
+correlating it with what happens in the simulation, or by checking logs and
+vehicles and controller statistics. The behaviour one should expect to see is
+what described in the requirements (\ref{req:requirements}).
 
 For communication and interaction between the services, the simple fact that the
 project worked was enough: bugs and problems only came after, when the it was
@@ -96,16 +97,15 @@ and 50), to see how the system and the controller's work would change. However,
 the road configuration has never been changed, although it's possible to easily
 change the number of roads or the size of the roundabout.
 
-Once run the simulation, tests were made with varying amounts of vehicle into
-failsafe of disconnected vehicles.
+Once run the simulation, tests were made with varying amounts of vehicles into
+failsafe of disconnected mode.
 \\
 \\
-When the project can be considered working, some possible evaluation metrics at
-disposal, available on the simulation page (refer to the user guide,
-\ref{user-guide}), are the number of collisions happened and the total number of
-spawned vehicles in a certain amount of time, to measure the total throughput of
-the roundabout. Here follow some example runs; refer to the self-evaluation
-(\ref{self-evaluation}) for a short analysis.
+Some possible evaluation metrics at disposal, available on the simulation page
+(refer to the user guide, \ref{user-guide}), are the number of happened
+collisions and the total number of spawned vehicles in a certain amount of time,
+to measure the total throughput of the roundabout. Here follow some example
+runs; refer to the self-evaluation (\ref{self-evaluation}) for a brief analysis.
 
 Each test has been run for 10 minutes:
 \begin{itemize}

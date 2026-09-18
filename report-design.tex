@@ -2,22 +2,23 @@
 \section{Design}\label{design}
 
 \subsection{Architecture}\label{arch:architecture}
-The architecture is event-driven, revolving around a message oriented broker,
-through a publish-subscribe mechanism. Under normal conditions, there's a
-centralized controller to orchestrate traffic; however, each vehicle is also
-provided with an autonomous and fully functioning logic (\textit{failsafe
-mode}), in order to work even under network unavailability. Finally, a server,
-subscribed to the same message broker, employs a REST API to serve the
-simulation visualization to a client and to receive configuration commands.
-
+The architecture is \textbf{event-driven}, revolving around a \textbf{message}
+oriented \textbf{broker}, through a \textbf{publish-subscribe} mechanism. Under
+normal conditions, there's a centralized controller to orchestrate traffic;
+however, each vehicle is also provided with an autonomous and fully functioning
+logic (\textit{failsafe mode}), in order to work even under network
+unavailability. Finally, a \textbf{server}, subscribed to the same message
+broker, employs a REST API to serve the simulation visualization to a client and
+to receive configuration commands.
+\\
+\\
 This architecture type addresses many of the distributed systems features
 discussed in the requirements.
-\\
-\\
+
 First of all, the message based broker already provides naturally many forms of
-\textbf{transparency} (\ref{req:distr_transparency}), since every node has to
+\textbf{transparency} (\ref{req:distr_transparency}), since everyone has to
 only communicate with this, without having to know many details about the
-others, not even their number (\textbf{scalability transparency}),
+other nodes, not even their number (\textbf{scalability transparency}),
 or having to share additional information with them.
 
 Moreover, a broker, using a standard protocol for messages, makes it
@@ -30,15 +31,13 @@ protocols (openness, \ref{req:distr_openness}).
 \\
 \\
 Implementing an autonomous logic in each car was fundamental: it's the only way
-to guarantee the required (requirement 6.1, \ref{req:req_fault}) fault tolerance
-(\ref{req:distr_dependability}). In fact, even if the controller was perfectly
-implemented to be always available, there can always be network issues, and a
+to guarantee the required fault tolerance (\ref{req:req_fault},
+\ref{req:distr_dependability}). In fact, even if the controller was perfectly
+implemented to be always available, there could always be network issues, and a
 car accident can't be accepted. Furthermore, one should also expect that some
-vehicles may be completely unreachable: even if the controller has a way to
-tackle this problem (refer to controller's behaviour, \ref{arch:behaviour}) by
-receiving the cars in the local vision of each one, there can never be a
-guarantee that it won't miss some, especially when there are only a few ones
-responding and sharing data. Finally, even in normal conditions, a local logic,
+vehicles may be completely unreachable, creating problems the controller can't
+always arginate with its counter-measures (refer to controller's behaviour,
+\ref{arch:behaviour}). Finally, even in normal conditions, a local logic,
 without any network latency, constitutes an additional safety measure.
 \\
 \\
@@ -49,13 +48,13 @@ a few system's maintainers for monitoring purposes.
 
 \subsection{Infrastructure}\label{infrastructure}
 The infrastructure follows simply from the architecture
-(\ref{arch:architecture}), with components:
+(\ref{arch:architecture}), with these components:
 
 \begin{itemize}
   \item A car (replicated in multiple instances), comprising fictional sensors
-  (sensing data), actuators (applying instructions) and their own logic.
+  (sensing data), actuators (applying instructions) and its own logic.
   \item One controller.
-  \item One messaage broker.
+  \item One message broker.
   \item One simulation service: subscribed to the same broker, it handles some
   tasks about the simulation itself, most of all detecting collisions between
   vehicles.
@@ -66,7 +65,7 @@ The system uses Docker containerization to simulate a geographically distributed
 environment. Each vehicle and each other component runs as an isolated process
 in its own container, sharing only the broker's virtual network. So, every
 communication happens through the broker, except the REST calls from the
-simulation's viewer to the web server.
+simulation's human spectator to the web server.
 
 \begin{figure}
     \centering
@@ -77,16 +76,16 @@ simulation's viewer to the web server.
 
 \subsection{Modelling}\label{arch:modelling}
 \textbf{Domain entities} are mostly constituted by the vehicles: the entity
-defined as \textbf{vehicle position} only only contains spatial data (position
-and speed); the \textbf{vehicle} entity contains the same spatial data plus some
+defined as \textbf{vehicle position} only contains spatial data (position and
+speed); the \textbf{vehicle} entity contains the same spatial data plus some
 additional information, such as acceleration, entry and exit road (to the
 roundabout) and variables for displaying. Furthermore, for both vehicles and
 positions, a \textbf{navigation state} is defined for convenience:
 \textbf{approaching} when going towards the roundabout, \textbf{inside} when
-driving around it, \textbf{exiting} when going away. Note that a \textbf{vehicle
-position} reflects our model of what a car's local vision can perceive:
-infra-red sensors would be able to quickly read another object's speed and
-position.
+driving around it, \textbf{exiting} when going away. Notice how a
+\textbf{vehicle position} reflects our model of what a car's local vision can
+perceive: infra-red sensors would be able to quickly read another object's speed
+and position.
 
 In addition, there are entities for \textbf{controller commands} (issued to
 vehicles) and \textbf{system commands} (configuration controls issued by the
@@ -111,7 +110,7 @@ The controller maintains:
 
 All data on the controller's node is kept up-to-date, i.e. old entries (older
 than a certain threshold) are periodically purged, hence its never too different
-from the real-time data, known by each vehicle alone.
+from the real-time data, uniquely known by each vehicle alone.
 
 All commands are exchanged over the network and used immediately, never stored.
 
@@ -123,29 +122,30 @@ component:
   ones): the controller doesn't utilize this, since this data wouldn't be
   available in real life, but the simulation does, in order to display the real
   state to the viewer;
-  \item a periodical message for the objects in the local vision of each healthy
-  vehicle;
-  \item periodical messages for controller commands, indicating what
+  \item a periodical message for the objects in the \textbf{local vision} of
+  each healthy vehicle;
+  \item periodical messages for \textbf{controller commands}, indicating what
   acceleration the car should use;
-  \item periodical controller messages to share its state (for debugging),
-  containing its managed entities;
-  \item messages for system commands (over REST API), from the user to the web
-  viewer (which will then communicate them to the correct recipient);
-  \item messages for system commands (\textit{sysctrl} MQTT messages), from the
-  web viewer (after receiving one from the viewer), either towards individual
-  vehicles or towards all at the same time in broadcast;
-  \item messages for detected collisions, from the simulation component, to be
-  displayed to the viewer;
-  \item a message sent by a vehicle to communicate that it has reset it's
-  position (about reset in \ref{arch:behaviour_simulation}), for displaying
-  purposes;
+  \item periodical \textbf{controller} messages to share its \textbf{state} (for
+  debugging), containing its managed entities;
+  \item messages for \textbf{system commands} (dubbed \textit{sysctrl}), from
+  the user (over REST API) to the web viewer (which will then communicate them
+  to the correct recipient);
+  \item messages for \textbf{system commands} (\textit{sysctrl} MQTT messages),
+  from the web viewer (after receiving one from the viewer), either towards
+  individual vehicles or towards all at the same time in broadcast;
+  \item messages for detected \textit{sysctrl}{collisions}, from the simulation
+  component, to be displayed to the viewer;
+  \item a message sent by a vehicle to communicate that it has
+  \textit{sysctrl}{reset} it's position (about reset in
+  \ref{arch:behaviour_simulation}), for displaying purposes;
 \end{itemize}
 
 Related to the messages, the main events can be identified as:
 \begin{itemize}
   \item \textit{TelemetryUpdated}: a vehicle shares its kinematic state;
-  \item \textit{VisionUpdated}: a vehicle shares the object detected through its
-  local vision;
+  \item \textit{VisionUpdated}: a vehicle shares the objects detected through
+  its local vision;
   \item \textit{CommandIssued}: the controller has evaluated the state and
   instructs a vehicle to accelerate or brake;
   \item \textit{CollisionDetected}: the simulation service identifies a car
@@ -184,7 +184,7 @@ message channel --- read by the web service for visualization.
 The \textbf{web server} displays vehicles, vehicles' states and controller's state, all
 fetched periodically throught the broker. Moreover, upon receiving a system
 command from the viewer, it sends the proper message (through the broker) to
-vehicles or to the controller.
+the correct vehicles.
 
 \begin{figure}
     \centering
@@ -198,9 +198,9 @@ vehicles or to the controller.
 In general, vehicles represent the ``truth'' of the system, since they are the
 ones physically occupying a certain position and moving around, regardless of
 the state of the network; to them, the controller is an external service which,
-in normal conditions, they entrust to give them the most efficient, safe
-driving command. Finally, the simulation and visualization services are mostly
-mere observers --- with the visualizer that can forward system commands.
+in normal conditions, they consult to receive the most efficient, safe driving
+command. Finally, the simulation and visualization services are mostly mere
+observers --- with the visualizer that can forward system commands.
 \\
 \\
 \subsubsection{Controller}\label{arch:behaviour_controller}
@@ -212,65 +212,65 @@ times per second).
 Each received vehicle telemetry is saved together with a timestamp, in order to
 only keep the most recent data and purge entries older than a certain threshold
 (currently 0.5 seconds): these are called ``\textbf{active vehicles}''.
-Moreover, before each evaluation cycle, the current position of each one is
-estimated, by moving them by the distance they would have ridden, in their
-current state, in the time interval since their communication: in this way, not
-only are the positions presumably more accurate, but they also all refer to the
-same instant.
+Moreover, before each evaluation cycle, the position at the current time is
+estimated for each one,  by moving them by the distance they would have ridden,
+in their current state, in the time interval since their communication: in this
+way, not only are the positions presumably more accurate, but they also all
+refer to the same instant.
 
 The vehicles in their local vision, called ``\textbf{ghosts}'', are instead all
-collected together, since they're just positions and can't be merged directly if
-they represent the same one; to reduce their number, a more complex technique is
-needed. Basically, each ghost is first moved to its predicted current position
-(like for \textit{active vehicles}), then checked for collisions against the set
-of each \textit{active} one: in case of a match, it's discarded, likely
-referring to the same one; otherwise, it's saved as a distinct vehicle and will
-also be checked for collisions with other \textit{ghosts}, to avoid to repeat
-them.
+collected together, since they're just positions and can't be merged directly
+even if they represent the same one; to reduce their number, a more complex
+technique is needed. Basically, each ghost is first moved to its predicted
+current position (like for \textit{active vehicles}), then checked for
+collisions against the set of each \textit{active} one: in case of a match, it's
+discarded, likely referring to the same one; otherwise, it's saved as a distinct
+vehicle and will also be checked for collisions with other \textit{ghosts}, to
+avoid to repeat them.
 
 Since entry and exit road aren't known for ghosts, additional precautions are
 taken to further optimize the process. Entry isn't actually important: it's
-obvious for an approaching car and irrelevant for an exiting one, whereas it
-could be used to make predictions for one inside the roundabout (with the
-assumption that they won't make more than one lap, from requirement 2.3, in
-\ref{req:requirements}). The exit of a vehicle inside is instead very useful to
-optimize the the entry of others. To grant the safety of the following
-calculations, the worse options are assumed for a vehicle inside, and assigned
-to each ghost: the last passed road is picked as both entry and exit.
+obvious for an approaching car and irrelevant for an exiting one; for one inside
+the roundabout, however, future developments could use it to make some
+predictions (e.g. with the assumption that they won't make more than one lap,
+from requirement 2.3, in \ref{req:requirements}). The exit of a vehicle inside
+is instead very useful to optimize the entry of others. To grant the safety of
+the subsequent calculations, the worst options are assumed for a vehicle inside
+and assigned to each ghost: the last passed road is picked as both entry and
+exit.
 
 Prediction of vehicles' current positions, ghosts merging and out-of-date
 purging (for both vehicles and ghosts) are performed periodically before each
-loop of command evaluation. It's important to remark that keeping the number of
-vehicles (active plus ghosts) as low as possible is important for performance,
-given the quadratic complexity of an evaluation and the fact that ghosts may
-themselves be the squared number of total vehicles, if each one sees each other
-one, possibly repeated if local vision messages are collected repeatedly. It
-should also be noted that the more vehicles are disconnected from the network,
-the less reliable this data will be, having more ``invisible'' nodes than those
-contributing to the crowdsensing. Moreover, data can only be provided by
-vehicles connected to the network (whether they're responding to commands or
-driving in failsafe mode), but not by those which are completely disconnected
-from the network.
+loop of commands evaluation. It's important to remark that keeping the number of
+total vehicles (active plus ghosts) as low as possible is relevant for
+performance, given the complexity: an evaluation has quadratic complexity in the
+number of total vehicles and ghosts themselves may be the squared number of
+existing vehicles (if each one sees each other one once), possibly repeated if
+local vision messages are collected repeatedly. It should also be noted that the
+more vehicles are disconnected from the network, the less reliable this data
+will be, having more ``invisible'' nodes than those contributing to the
+crowdsensing. In fact, data can only be provided by vehicles able to publish to
+the network (whether they're responding to commands or driving in failsafe
+mode), but not by those which are completely disconnected.
 \\
 \\
 The \textbf{evaluation} phase runs a sequence of checks for each active vehicle
-$v_1$: in a single loop, it will be compared with each other active or ghost
-vehicle $v_2$ --- only active vehicles will receive the resulting commands.
+$v_1$: in a single loop, $v_1$ will be compared with each other active or ghost
+vehicle $v_2$ --- but only active vehicles will receive the resulting commands.
 
 The general traffic principles for the controller are the following:
 \begin{itemize}
   \item a vehicle, in any navigation state, should monitor the one in front to
   avoid to crash into it;
   \item approaching vehicles gain a priority level as soon as they get close 
-  (within a threshold of a few meters) to
-  the roundabout entry (basically FIFO, but not too rigid);
+  (within a threshold of a few meters) to the roundabout entry (aim to be FIFO,
+  without being too rigid);
   \item vehicles inside generally have the priority;
-  \item given the priority queue of approaching ones, a vehicle inside the
-  roundabout should try to slow down and yield to an entering one, if it has a
-  higher priority, but only if this can be done \textit{safely}. In the same
-  way, an entering vehicle, even if it has higher priority on one coming from
-  inside, shouldn't enter if this would put the one inside in a dangerous
-  situation.
+  \item given the priority queue of approaching ones, a $v_1$ inside the
+  roundabout should try to slow down and yield to an entering $v_2$, if $v_2$
+  has a higher priority, but only if this can be done \textit{safely}. In the
+  same way, $v_2$, even if it has higher priority on $v_1$, shouldn't enter if
+  this would put $v_1$ in a dangerous situation.
 \end{itemize}
 
 Controller's evaluations thus try to apply any possible optimization, as long as
@@ -289,15 +289,15 @@ before $v_1$ realizes it needs to brake and starts slowing down.
 \[
   safe\_dist = (stop\_dist_{v_1} - stop\_dist_{v_2}) + react\_dist_{v_1} + safe\_margin
 \]
-To guarantee safety, one should use the maximum braking acceleration for $v_2$,
-in case it has to brake for emergency, and a light deceleration for $v_1$, so
-that it's able and ready to stop at any time with minimal wear on the mechanical
-components. In this scenario, reaction time for the controller should be equal
-to the data staling timer and the network timeout, because $v_1$ would have
-ridden more distance in that interval, potentially getting to close to $v_2$; on
-the other hand, a vehicle can have a negligible reaction time, when it controls
-itself as a computer. Lastly, the safety margin can be set to a few meters, for
-example the length of one car.
+As optimal parameters, one should use the maximum braking acceleration for
+$v_2$, in case it has to brake for emergency, and a light deceleration for
+$v_1$, so that it's able and ready to stop at any time with minimal wear on the
+mechanical components (requirement \ref{req:req_22}). Reaction time for the
+controller should be equal to the data staling timer and the network timeout,
+because $v_1$ would have ridden more distance in that interval, potentially
+getting too close to $v_2$; on the other hand, a self-controlled vehicle can
+have a negligible reaction time. Lastly, the safety margin can be set to a few
+meters, for example the length of one car.
 
 The main priority for the controller is to respect this constraint at all times:
 $v_1$ can't accelerate if it doesn't have enough braking margin. Taking
@@ -310,8 +310,8 @@ a lower reaction time.
 \\
 \\
 After having made sure that $v_1$ doesn't have to brake before a $v_2$ in front,
-if it is close or inside the roundabout, the controller has to handle the most
-critical points: the entrances.
+if it is close to or inside the roundabout, the controller has to handle the
+most critical points: the entrances.
 
 When $v_1$ is about to enter, it will check for all vehicles already inside.
 Those that will exit before its entrance can be safely ignored. For every other
@@ -327,53 +327,54 @@ The $v_2$ inside itself is also under examination, in case it has to yield (to
 someone with higher priority) or in case $v_1$ is close to the entrance. In both
 situations, $v_2$ will try to facilitate the entrance of $v_1$ by slowing down
 if needed, but only if it can be done safely --- otherwise, recall that who's
-inside has the priority. Moreover, to safeguard the traffic flow, vehicles
-inside never go below a certain speed threshold, unless the safety distance has
-been violated, with respect to either the vehicle in front or the one about
-to enter.
+inside has the priority. Nonetheless, to safeguard the traffic flow's liveness,
+vehicles inside never go below a certain speed threshold, unless the safety
+distance has been violated, with respect to either the vehicle in front or the
+one about to enter.
 
-Additionally, vehicles in a \textit{failsafe} or \textit{disconnected} state are
-given higher precedence at the intersection, i.e. a responding vehicle will try
+Vehicles in a \textit{failsafe} or \textit{disconnected} state are also
+given higher precedence at the intersections, i.e. a responding vehicle will try
 to yield to them (again, safely). The first reason is to make them pass and get
 rid of them as soon as possible, since they will drive slower and less
 optimally. The second reason is to avoid \textbf{starvation} at all: vehicles in
 failsafe mode are more ``timid'' and would risk to never be able to enter,
-especially if there are only one or a few (refer to \ref{arch:behaviour_vehicle}
+especially if they are only one or a few (refer to \ref{arch:behaviour_vehicle}
 for vehicle logic).
 \\
 \\
-Before an evaluation, in order to make the single loop of commands evaluations
-more optimal, all vehicles (active plus ghosts) are \textbf{sorted} through a
-simple heuristic, putting the ones with a higher priority first: exiting ones,
-then inside ones, then approaching ones; approaching ones come first the closer
-they are to the center, while exiting ones come first the further they are;
-inside ones are picked in clock-wise order.
+Before all, however, in order to make the single loop of commands evaluations
+more optimal, all vehicles are \textbf{sorted} through a simple heuristic,
+trying to put the ones with a higher priority first: exiting ones, then inside
+ones, then approaching ones; approaching ones come first the closer they are to
+the center, while exiting ones come first the further they are; inside ones are
+picked in clock-wise order.
 
 In this way, before evaluating for $v_1$, the speed of a $v_2$ in front is
 always already known, since it will have been processed first: this makes the
 safety distance estimates more correct. The only exception, not taken into
 consideration, regards the ``junction point'' for the ones inside: since they
 are taken in clock-wise order starting from a random point, the first picked
-vehicle will be evaluated before the one in front of it. Moreover, inside
-vehicles come before approaching ones because they generally have the priority.
-Once in the exiting state, instead, they have already passed the intersection
-and don't have many possible conflict, but should only care about who's in
-front.
+vehicle will be evaluated before the one in front of it. Inside, on the other
+hand, vehicles come before approaching ones because they generally have the
+priority. Once in the exiting state, instead, they have already passed the
+intersection and don't have many possible conflict, but should only care about
+who's in front.
 \\
 \\
 One final controller's feature is aimed at preventing a deadlock inside the
 roundabout, in a case where all vehicles have halted but no one can resume
 because they're all too close to the one to their respective front: according
 the described logic, in fact, such a vehicle wouldn't accelerate until it has
-enough margin. Hence, if all inside vehicles have been stationary for a
-certain amount of time (e.g. 2 seconds), the controller will trigger a command 
-to accelerate to all; if there are some that have more margin
+enough margin (safety distance). Hence, if all inside vehicles have been
+stationary for a certain amount of time (e.g. 2 seconds), the controller will
+trigger a command to accelerate to all; if there are some that have more margin
 than others, it will try to only send the command to them. In the worst case,
 all vehicles should proceed extremely slowly until someone exits, continuously
-alternating an acceleration and an emergency brake soon after. In an ideal
-world, all vehicles in a line could start accelerating at the same time and same
-pace, without colliding, but they would still have to go extremely slow, in
-order to be ready for any emergency brake with that small margin in front.
+alternating an acceleration and an emergency brake soon after. In a future
+implementation, all vehicles in a line could start accelerating at the same time
+and same pace, without colliding, although one should then be sure that there
+won't be any abrupt on unexpected moves, or they won't be ready to brake with
+that small safety margin.
 
 In such a deadlock state, the controller won't allow any other vehicles to enter
 until a certain number of those inside has exited.
@@ -394,29 +395,26 @@ well).
 \\
 Knowing the controller's functioning mechanism, it's now possible to see that
 its complexity is approximately quadratic in the number of total vehicles.
-Deeper studies on a real scenario would be required to understand if the
-evaluation frequency could be increased. Improved estimations would in fact come
-at a higher computational cost, possibly even made worse by an higher number of
-vehicle nodes; however, a server of modest dimensions may be able to handle
-them.
+Improving estimations through a higher evaluation frequency would thus come at a
+higher computational cost, possibly even made worse by an higher number of
+vehicle nodes, so careful examinations would be required first.
 
 \subsubsection{Vehicle}\label{arch:behaviour_vehicle}
-Each vehicle repeatedly (currently 10 times per second) runs a procedure to take
-a decision (on the new acceleration to apply) and to apply it, proceeding then
-to update its own position by physically moving according to its speed,
-direction and destination. In parallel, it also listens for commands from
-controller and web server and publishes its data.
+Each vehicle repeatedly (currently 10 times per second) runs a procedure: take a
+decision (on the new acceleration to apply), apply it, update the own position
+by physically moving according to current speed, direction and destination. In
+parallel, it also listens for commands from controller and web server and
+publishes its data.
 
-An actuation loop starts with a local check an \textbf{emergency} command; if
-it's not needed, the vehicle uses the last received controller's command if it's
-available and not too old, otherwise runs its own evaluation logic: it thus
-assumes that there's a network problem and goes in \textbf{failsafe} mode. After
+An actuation loop starts with a local check for an \textbf{emergency} command;
+if one's not needed, the vehicle uses the last received controller's command if
+available and not too old, otherwise, assuming that there's a network problem,
+it goes in \textbf{failsafe} mode and runs its own evaluation logic. After
 having taken and applied the decision, it will try in all cases to share its
 updated position with the controller: if the connection had been lost, this is
 used as a heartbeat, to try to re-establish it; if it's driving in failsafe mode
-for necessity, it will still update the controller so that it can give better
-commands to the others, even if the vehicle itself won't execute the received
-ones.
+for necessity, it won't execute received commands, but it will still update the
+controller so it can perform better evaluations for the others.
 \\
 \\
 The checks performed in both \textbf{emergency} and \textbf{failsafe}
@@ -437,16 +435,16 @@ fact, regarding the security, the \textit{emergency} mechanism already takes
 care of all cases of emergency brakes, while, regarding the optimization, the
 vehicle partly lacks information on the others in order to make the best
 decisions, partly assumes the others will follow the traffic rules: whether
-they're follow the controller's commands or their owns, each logic still aims to
-only do safe moves.
+they're following the controller's commands or their owns, each logic still aims
+to only do safe moves.
 
 \subsubsection{Simulation}\label{arch:behaviour_simulation}
 The simulation service only takes care of identifying and publishing any
 collisions, calculated by looking for pairs of overlapping cars; to avoid an
-overflooding of messages, there's a cooldown (e.g. 1 second) to identify again
-collisions between the same pair of vehicles.
+overflooding of messages, there's a cooldown (e.g. 1 second) for each pair of
+vehicles, when a collision has been found.
 
-The state of the simulation system is actually kept be the vehicles, each
+The state of the simulation system is actually kept by the vehicles, each
 knowing (and publishing) its position.
 
 The number of vehicles remains always the same; when one gets far enough from
@@ -461,8 +459,8 @@ The service listens to and saves all vehicles states, controller's state and
 simulation's collisions.
 
 It then exposes API endpoints to read its state and to post controls, to one or
-more vehicles, to pause and resume the simulation or to go into failsafe or
-disconnected mode.
+more vehicles, to pause and resume the simulation or to force failsafe or
+disconnected modes.
 
 \begin{figure}
     \centering
@@ -482,15 +480,16 @@ message topics in order to collect the system's data for later analysis and
 debugging (for example, even in case of accidents).
 \\
 \\
-The system uses \textbf{eventual consistency}; after all, every component's view
-is always behind the physical reality, only known by the cars themselves, and a
-network disconnection will increase the delay. Nonetheless, vehicles
-continuously publish their data, so that a listener will sooner or later fetch
-the latest state. Therefore, data freshness is prioritized over consistency and
-purging old data is better than synchronizing it.
+The system uses \textbf{eventual consistency}; after all, due to latencies and
+network delays, every component's view is always behind the physical reality,
+only known by the cars themselves. Nonetheless, vehicles continuously publish
+their data, so that a listener will sooner or later fetch the latest state.
+Therefore, data freshness is prioritized over consistency and purging old data
+is better than synchronizing it.
 
-Additionally, the controller tries to improve the consistency of its state with
-the real one through the prediction mechanism (\ref{arch:behaviour_controller}).
+On the other hand, the controller tries to improve the consistency of its state
+with the real one through the prediction mechanism
+(\ref{arch:behaviour_controller}).
 
 \subsection{Fault-Tolerance}\label{arch:fault}
 Accepting the possibility of errors is one of the main concerns of the project;
@@ -499,16 +498,16 @@ moving and can't afford to stop and wait for the signal to come back or the
 problems to be fixed. So, when messages don't travel successfully between the
 controller and a vehicle, they are simply \textbf{ignored}: each vehicle also
 has its own logic (\ref{arch:behaviour_vehicle}), to be able to somehow proceed
-safely even without the controller's commands; the controller will try it best
+safely even without the controller's commands; the controller will try its best
 to provide optimal commands to the remaining healthy ones
 (\ref{arch:behaviour_controller}).
 
 The vehicles' failsafe and emergency modes hence contribute to increase the
-\textbf{reliability} of the system (\ref{req:distr_dependability}). Unexpected
-events may always occur, especially if many vehicles are disconnected from the
-network and, consequently, the controller can't have fully reliable data on
-them. Moreover, in the real world, there could always be other obstacles on the
-road, objects, pedestrian, etc.
+\textbf{reliability} of the system (\ref{req:distr_dependability}). Because
+unexpected events may always occur, especially if many vehicles are disconnected
+from the network, the controller can't have fully reliable data. Moreover, in
+the real world, there could always be other obstacles on the road, objects,
+pedestrian, etc.
 
 \textbf{Timeouts} are fundamental to mark vehicles' and controller's data as old
 and no longer usable. Messages between the two components are used as
@@ -526,17 +525,17 @@ lacking. Regarding starvation, after all, even in the real world it could be a
 problem in busy situations where a too insecure driver blocks one entry for
 minutes, letting everyone coming from other directions pass. Regarding
 deadlocks, the fact that vehicles in failsafe mode tend to not yield (unless
-necessary for emergency) when inside the roundabout should reassure (but not
-guarantee), analogously to what discussed about deadlocks in the controller's
-section (\ref{arch:behaviour_controller}).
+necessary for emergency) when inside the roundabout should be of reassurabce
+(but not guarantee).
 \\
 \\
 Availability and fault tolerance improvements, however, haven't been considered
 for the \textbf{controller}. One possibility would be to deploy more controller
-nodes to use as \textit{master-slave replication}: one is elected as the working
-one, while the others only follow to keep their state up to date; in case of
-failure, a replica will become the new master. This approach would avoid to add
-latency, since the replicas don't need to communicate in normal conditions.
+nodes to use for \textit{master-slave replication}: one is elected as the
+working one, while the others only follow to keep their state up to date; in
+case of failure, a replica will become the new master. This approach wouldn't
+need to add latency, since the replicas don't need to communicate in normal
+conditions.
 
 \subsection{Availability}\label{arch:availability}
 Since data freshness is much more important than consistency (analogously to
@@ -556,7 +555,7 @@ Since more roundabouts are mostly independent (although they could probably even
 be coordinated with each other), \textbf{network partitioning} could be a better
 option. If the city was divided into multiple zones by geographical
 partitioning, a controller could be dedicated to each one and thus have a
-reduced load; with a message topic dedicated to each zone, a vehicle would then
+reduced load; with a message topic dedicated to each zone, then, a vehicle would
 only have to subscribe to right one.
 
 \subsection{Security}\label{arch:security}
@@ -565,16 +564,17 @@ despite the observations in \ref{req:distr_security}.
 
 According to the current design, the system has already been thought to prevent
 accidents due to wrong commands, thanks to the cars' \textit{local vision} and
-the \textit{failsafe} and \textit{emergency mode} that can take control in case
+the \textit{failsafe} and \textit{emergency modes} that can take control in case
 of need; however, an overflooding of inexisting cars' positions could still lead
 the controller to block the entire system.
 \\
 \\
 In this implementation, the docker network is assumed to be secure; future
-improvements may require authentication through TLS for message exchange and
-provide a unique cryptographic key to each vehicle. For separation of concerns,
-the broker may also verify authorization through Access Control Lists, where
-each role is only authorized to publish on certain message topics:
+improvements, also to prevent malicious injection of commands, may require
+authentication through TLS for message exchange and provide a unique
+cryptographic key to each vehicle. For separation of concerns and privileges,
+the broker may verify authorization through Access Control Lists, where each
+role is only authorized to publish on certain message topics:
 \begin{itemize}
   \item \textit{Vehicle N}: can only share its own data and subscribe to
   commands directed to it;

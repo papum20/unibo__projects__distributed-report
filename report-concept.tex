@@ -12,15 +12,15 @@ the application itself.
 
 The simulation has been thought to run endlessly without the need for human
 interaction; the commands may be used for debugging or for testing particular
-scenarios (pause/resume, change the state of some vehicles to disconnected from
-the network, fetch information on them). No user data is thus required to be
-stored.
+scenarios (pause/resume, inject chaos by changing the state of some vehicles to
+disconnected from the network, fetch information on them). No user data is thus
+required to be stored.
 
 Even inside the simulated world, cars are completely autonomous and don't
 require any human interaction. The central controller only needs to collect from
 each one some spatial information (such as position an speed) and store it for a
-small amount of time (e.g. 1 second, after which data is considered stale and no
-longer useful).
+small amount of time (e.g. 1 second), after which data is considered stale and
+no longer useful.
 
 This scenario could already be considered a distributed system due to its own
 nature, where the cars are nodes that, in order to navigate safely, need to at
@@ -31,4 +31,4 @@ one's position and destination and being able to adjust the speed of each one,
 it can optimize their interleaving order and make them run under more
 sustainable conditions. For example, braking too hard, with time, wears some
 components such as the tyres; on the other hand, avoiding higher speeds when not
-need will also save some fuel, besides carrying fewer risks in general.
+needed will also save some fuel, besides carrying fewer risks in general.

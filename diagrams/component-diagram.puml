@@ -2,7 +2,7 @@
 skinparam componentStyle uml2
 
 node "Docker Host Network" {
-    component "MQTT Broker\n(Eclipse Mosquitto)" as Broker <<Message Bus>>
+    component "MQTT Broker" as Broker <<Message Bus>>
     
     component "Central Controller" as Controller <<Server>>
     

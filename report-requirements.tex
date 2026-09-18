@@ -1,9 +1,9 @@
 % ! TeX root = distributed-systems-final-report.tex
 \section{Requirements Elicitation and Analysis}\label{req:requirements}
 
-Generally, the functional requirements of the project are to build the said
-simulation, together with an application to visualize it and some commands to
-manage it.
+In general terms, the functional requirements of the project concern the
+building of a simulated environment, together with an application to visualize
+it and some commands to manage it.
 
 \begin{itemize}
   \item 1 --- The system shall comprise a roundabout, surrounded by a certain
@@ -13,16 +13,16 @@ manage it.
   \item 1.2 --- A road is made of two lanes, for opposite directions; vehicles
   ride on their respective right side.
   \item 2 --- The system shall comprise a certain amount of cars (in a reasonable
-  number, e.g. up to 30).
-  \item 2.1 --- A car's surface covers a rectangle, both visually (viewed
-  top-down) and physically (e.g. for collisions).
-  \item 2.2 --- A car is able to move in space, at a speed which can range
-  from a certain minimum to a certain maximum and be changed by changing its
-  acceleration. The physical model thus comprehends simple uniform motion
-  and uniformly accelerated motion, both linear (for a straight road) and
-  circular (around the roundabout). Acceleration also ranges from a negative
-  minimum (for braking) to a positive maximum; the minimum amount (i.e.
-  strongest braking) should be used as little as possible, to reduce car's wear.
+  number, e.g. 30).
+  \item 2.1 --- From a top-down perspective, a car's surface covers a rectangle,
+  both visually and physically (e.g. for collisions).
+  \item 2.2\label{req:req_22} --- A car is able to move in space, at a speed
+  which can be tuned between certain minimum and maximum values by changing its
+  acceleration. The physical model thus comprehends simple uniform motion and
+  uniformly accelerated motion, both linear (for a straight road) and circular
+  (around the roundabout). Acceleration also ranges from a negative minimum (for
+  braking) to a positive maximum; the minimum amount (i.e. strongest braking)
+  should be used as little as possible, to reduce the car's wear.
   \item 2.3 --- Each car is assigned an entry road and an exit road: it
   will come from the former towards the central roundabout, ride some distance
   inside it and then exit from the latter. It can spawn on any point on the
@@ -33,31 +33,28 @@ manage it.
   \item 2.4 --- Each car is able to proceed autonomously.
   \item 2.5 --- Each car is provided with a local vision, allowing it to perceive
   others nearby (in reality, it could be implemented through infra-red, for
-  example).t
+  example).
   \item 3 --- The system shall comprise one controller.
   \item 3.1 --- The controller can receive spatial data from vehicles.
   \item 3.2 --- The controller can send commands to vehicles, to alter their
   acceleration.
-  \item 4 --- The system shall show a simulation, where vehicles can move from
-  each one's start to end point and communicate with the controller.
+  \item 4 --- The system shall run a simulation, where vehicles move from each
+  one's start to end point while communicating with the controller.
   \item 4.1 --- In the simulation, vehicles can be in one of three states: normal
   (correctly communicating with the controller and following its orders);
-  failsafe (correctly communicating with the controller, but not receiving, or
+  failsafe (correctly communicating towards the controller, but not receiving, or
   receiving but not following, its orders); disconnected (completely unable to
   either send or receive data to or from the controller).
   \item 4.2 --- The simulation constantly checks for collisions between cars, in
   order to report them.
-  \item 5 --- The system shall offer ways to both visualize and give some commands
-  to the simulation.
-  \item 5.1 --- The system allows to visualize the simulation, in real time,
-  through a web application.
-  \item 5.2 --- The web application allows to pause or resume the simulation.
-  \item 5.3 --- The web application allows to visualize additional data on the
-  vehicles, such as current speed and acceleration.
-  \item 5.4 --- The system allows to send additional commands via http requests,
-  also accessible through a \textit{bash} wrapper terminal script.
-  \item 5.5 --- Available commands include: pausing and resuming the simulation,
-  changing the state of one or more vehicles.
+  \item 5 --- The system shall offer ways to both visualize and give some
+  commands to the simulation.
+  \item 5.1 --- The system allows to visualize the simulation in real time,
+  together with additional data on the vehicles, such as current speed and
+  acceleration.
+  \item 5.2 --- The system allows to send commands to control the simulation
+  including: pausing and resuming the simulation, changing the state of one or
+  more vehicles.
 \end{itemize}
 
 In the project, we identify the \textbf{roads} by their \textbf{index}: 0
@@ -66,21 +63,22 @@ road's indexes follow a counter-clockwise order. For instance, with 4 roads, 0
 is to the right, 1 up, 2 left, 3 down.
 \\
 \\
-Non-functional requirements are instead related to safety of vehicles on the
-road:
+Non-functional requirements are instead related to distributed systems matters:
 
 \begin{itemize}
   \item 6.1\label{req:req_fault} --- \textbf{Fault tolerance} of the entire
   system: the controller or the network may even experience malfunctions, but
   the safety of vehicles should be maintaned at all times, to prevent accidents.
   \item\label{req:req_openness} 6.2 --- \textbf{Openness} and
-  \textbf{interoperability}: the system should be open and interoperable with
-  different implementations, for example, from different car brands.
+  \textbf{interoperability}: the system should aim to be open and interoperable
+  with different implementations (for example, from different car brands, using
+  different technology).
 \end{itemize}
 
 Implementation requirements don't impose any particular technology, but rather
 an effort to employ two development methodologies strongly encouraged in the
-course's project requirements and which I personally have no experience with:
+course's project requirements and which I personally have little or no
+experience with:
 \begin{itemize}
   \item 7.1\label{req:model-first} --- \textbf{model-first} approach
   \item 7.2\label{req:test} --- \textbf{unit-testing}, possibly before writing the code itself
@@ -102,19 +100,19 @@ transparency} is necessary, since vehicles are moving all the time.
 On the other hand, \textbf{concurrency transparency} isn't relevant, since
 there's no shared resource to access, and \textbf{failure transparency} isn't
 granted, since failures are actually taken in great consideration in the project
-requirements themselves.
+requirements themselves and one component needs to know about others' failures.
 
 \subsubsection{Dependability}\label{req:distr_dependability}
 \textbf{Fault tolerance} is the main focus of the project, since \textbf{safety}
-should be granted at all times. Even with network issues, the system should
-provide \textbf{reliability} globally.
+should be granted at all times (requirement 6.1, \ref{req:req_fault}). Even with
+network issues, the system should provide \textbf{reliability} globally.
 
 \subsubsection{Scalability}\label{req:distr_scalability}
 As already mentioned, the number of vehicles will vary over time; however, it
 should be noted that the roundabout's surroundings can only contain a limited
 amount of cars, hence the actual number of involved nodes at the same time isn't
-expected to grow a lot. For a different, larger scenario trying to coordinate
-traffic across a wider area, this may become a more urgent issue.
+expected to grow a lot. For a different, larger scenario, for example trying to
+coordinate traffic over a wider area, this may become a more urgent issue.
 
 \subsubsection{Security}\label{req:distr_security}
 \textbf{Security} would be very important in this scenario, in
@@ -132,12 +130,12 @@ the entire system.
 No resource has been planned to be shared.
 
 \subsubsection{Openness, interoperability, heterogeneity of components}\label{req:distr_openness}
-As stated in constraint 6.2 (\ref{req:req_openness}), the system should be open to
-potentially welcome external vehicles' implementations, for example even with
+As stated in constraint 6.2 (\ref{req:req_openness}), the system should be open
+to potentially welcome external vehicles' implementations, for example even with
 different languages and technologies.
 
 \subsubsection{Evolvability, maintainability}\label{req:distr_evolv}
-The system probably doesn't require updates, unless there are changes to the
+The system doesn't require frequent updates, unless there are changes to the
 road or to traffic rules, but it may be extended in the future with additional
 features or performance optimizations. The logs could be useful to collect and
 analyze, for example, in case of an accident.
@@ -145,15 +143,17 @@ analyze, for example, in case of an accident.
 \subsubsection{Performance, concurrency, computation/communication efficiency, bandwidth}\label{req:distr_performance}
 Since vehicles are constantly moving, possibly even at high speeds, it's
 important to pose a limit to the latency of the communication of commands from
-the controller to each one.
+the controller to each one: a significant distance can be ridden in less than a
+second.
 
-Regarding computational performance and network load, since the system isn't
+Regarding computational performance and network load, because the system isn't
 expected to grow significantly (as mentioned in \ref{req:distr_scalability}),
-there shouldn't be a need for particularly expensive servers and network
-interfaces to sustain enough vehicles.
+there shouldn't be a need for particularly powerful expensive servers and
+network interfaces to sustain enough vehicles.
 
 \subsubsection{Economy, costs}
 There shouldn't be any particular constraints to limit economical costs: once
 servers and network interfaces have been set up, in a real life scenario, there
-don't seem to be any measures which could heavily impact the budget (also refer
-to scalability (\ref{req:distr_scalability}) for the expected system's dimensions).
+don't seem to be any measures which could be employed in the development to
+heavily impact the budget (also refer to scalability,
+\ref{req:distr_scalability}, for the expected system's dimensions).

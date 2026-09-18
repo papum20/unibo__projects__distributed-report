@@ -9,7 +9,7 @@ requests (for the web server).
 
 MQTT fits perfectly the publish-subscribe architecture and is an industry
 standard for IoT and Cyber-Physical Systems. Moreover, the protocol is
-specifically designed to work with constrained devices, to grant netowrk
+specifically designed to work with constrained devices, to grant network
 reliability. Level 0 Quality of Service has been chosen to grant the lowest
 latency (performance requirement, \ref{req:distr_performance}), thanks to its
 lower communication overhead; dropping packets isn't a problem, since having the
@@ -18,14 +18,14 @@ isn't used. Level 1 has only been used for system commands, which are issued
 sporadically but whose reception is more important.
 
 All in-transit data is serialized as JSON, which is easily readable for
-debugging and widely available acroos diffrent languages.
+debugging and widely available across diffrent languages.
 \\
 \\
 Regarding the \textbf{model-first} constraint (\ref{req:model-first}), it has
 been respected quite well: the models (in $src/common/models/$) have been
 defined before writing the code, with a python library enforcing data validation
 (pydantic). Many of the classes have been defined at the beginning of the
-development. Some classes have been added later when a new kind of message,
+development. Some classes have been added later when a new kind of entity,
 interaction or message was needed, as well as fields of existing classes were
 modified or new ones created.
 
@@ -33,12 +33,12 @@ modified or new ones created.
 \subsection{Technological details}\label{technological-details}
 
 Eclipse Mosquitto has been used as the MQTT broker, being a lightweight
-implementation with native Docker support. Furthermore, it also supports TLS
+implementation with native Docker support. Furthermore, it supports TLS
 authentication, for future development additions.
 
 All services are written in Python (3.12): vehicle, controller, web server,
 simulation service. The \textit{asyncio} library has been exploited to handle
-concurrent tasks, for instance for simultaneous, listening, publishing and logic
+concurrent tasks, for instance for simultaneous listening, publishing and logic
 loops. The \textit{aiomqtt} (2.5.1) library has been used used for MQTT
 communication. Finally, \textit{pydantic} (2.13.4) has been employed to define
 domain models, enabling a model-first approach. \textit{pydantic} also
@@ -47,4 +47,4 @@ data validation.
 
 Regarding the web service, the \textit{FastAPI} (0.141.1) library has been used
 for the backend, whereas the front-end is written as a simple HTML5 page,
-including CSS and a JavaScript Canvas.
+with CSS and JavaScript Canvas.
